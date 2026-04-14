@@ -1,0 +1,77 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 16px;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.title {
+  font-size: 2.4rem;
+  margin: 0;
+  letter-spacing: -1px;
+}
+
+.subtitle {
+  margin: 0;
+  opacity: 0.7;
+  font-size: 1.1rem;
+}
+
+.play-btn {
+  margin-top: 12px;
+  padding: 14px 48px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  background: #6c5ce7;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.play-btn:hover {
+  background: #5a4bd1;
+}
+.play-btn:active {
+  transform: scale(0.97);
+}
+
+.loading-text {
+  font-size: 1.1rem;
+  opacity: 0.6;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.color-swatch {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.ap-badge {
+  font-weight: 700;
+  background: rgba(108, 92, 231, 0.25);
+  padding: 2px 10px;
+  border-radius: 6px;
+}
+
+.placeholder {
+  margin-top: 32px;
+  opacity: 0.5;
+}
