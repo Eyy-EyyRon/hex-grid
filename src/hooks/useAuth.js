@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   GoogleAuthProvider,
   onAuthStateChanged,
@@ -91,7 +92,19 @@ export function useAuth() {
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (err) {
-      console.error("Google sign-in failed:", err);
+      if (
+        err.code === "auth/cancelled-popup-request" ||
+        err.code === "auth/popup-blocked" ||
+        err.code === "auth/popup-closed-by-user"
+      ) {
+        try {
+          await signInWithRedirect(auth, googleProvider);
+        } catch (redirectErr) {
+          console.error("Google redirect sign-in failed:", redirectErr);
+        }
+      } else {
+        console.error("Google sign-in failed:", err);
+      }
     }
   };
 
