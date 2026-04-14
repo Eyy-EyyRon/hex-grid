@@ -22,41 +22,76 @@ const PLAYER_COLORS = [
 
 const googleProvider = new GoogleAuthProvider();
 
+const CACHE_KEY = "hex_userData_";
+
+function cacheUserData(uid, data) {
+  try {
+    const serializable = {
+      ...data,
+      lastLoginTime: data.lastLoginTime instanceof Date
+        ? data.lastLoginTime.getTime()
+        : data.lastLoginTime?.toDate
+          ? data.lastLoginTime.toDate().getTime()
+          : data.lastLoginTime,
+    };
+    localStorage.setItem(CACHE_KEY + uid, JSON.stringify(serializable));
+  } catch (_) { /* ignore storage errors */ }
+}
+
+function loadCachedUserData(uid) {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY + uid);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (data.lastLoginTime) {
+      data.lastLoginTime = new Date(data.lastLoginTime);
+    }
+    return data;
+  } catch (_) { return null; }
+}
+
 export function useAuth() {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser && firebaseUser.isAnonymous) {
-        await signOut(auth);
+        signOut(auth);
         return;
       }
       if (firebaseUser) {
         setUser(firebaseUser);
-        const userDoc = await ensureUserDocument(
+
+        // Instantly show cached data so UI is not blocked
+        const cached = loadCachedUserData(firebaseUser.uid);
+        if (cached) setUserData(cached);
+        setLoading(false);
+
+        // Hydrate from Firestore in the background
+        ensureUserDocument(
           firebaseUser.uid,
           firebaseUser.displayName,
           firebaseUser.photoURL
-        );
-        setUserData(userDoc);
+        ).then((freshData) => {
+          setUserData(freshData);
+          cacheUserData(firebaseUser.uid, freshData);
+        });
       } else {
         setUser(null);
         setUserData(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
     return unsubscribe;
   }, []);
 
   const loginGoogle = async () => {
-    setLoading(true);
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (err) {
       console.error("Google sign-in failed:", err);
-      setLoading(false);
     }
   };
 

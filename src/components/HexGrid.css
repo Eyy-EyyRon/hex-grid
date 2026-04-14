@@ -4,18 +4,26 @@
   margin: 12px auto 0;
   display: flex;
   justify-content: center;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .hex-grid-svg {
   width: 100%;
   height: auto;
+  cursor: grab;
+}
+
+.hex-grid-svg:active {
+  cursor: grabbing;
 }
 
 .hex-cell {
   stroke: #444466;
   stroke-width: 1.5;
   cursor: pointer;
-  transition: fill 0.15s, stroke 0.15s, filter 0.15s;
+  transition: fill 0.3s ease, stroke 0.15s, filter 0.15s;
 }
 
 .hex-cell:hover {
@@ -27,4 +35,17 @@
   stroke: #fff;
   stroke-width: 2;
   filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));
+}
+
+.hex-cell--fog {
+  stroke: #1a1a2e;
+  stroke-width: 1.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+.hex-fort {
+  fill: none;
+  stroke-width: 2;
+  pointer-events: none;
 }

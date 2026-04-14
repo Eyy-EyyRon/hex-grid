@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { PLAYER_COLORS } from "../gameLogic";
+import { PLAYER_COLORS, parseTile } from "../gameLogic";
 import "./Leaderboard.css";
 
 export default function Leaderboard({ tiles, playerInfo, currentUid }) {
@@ -7,8 +7,9 @@ export default function Leaderboard({ tiles, playerInfo, currentUid }) {
     if (!tiles) return [];
 
     const counts = {};
-    Object.values(tiles).forEach((owner) => {
-      if (owner !== "empty") {
+    Object.values(tiles).forEach((val) => {
+      const { owner } = parseTile(val);
+      if (owner) {
         counts[owner] = (counts[owner] || 0) + 1;
       }
     });
