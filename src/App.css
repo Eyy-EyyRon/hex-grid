@@ -48,15 +48,23 @@
   opacity: 0.6;
 }
 
+.game-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .user-info {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 1rem;
-  background: rgba(255, 255, 255, 0.06);
-  padding: 8px 18px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 10px;
+  font-size: 0.95rem;
 }
 
 .color-swatch {
@@ -67,14 +75,46 @@
   border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
-.ap-badge {
-  font-weight: 700;
-  background: rgba(108, 92, 231, 0.25);
-  padding: 2px 10px;
-  border-radius: 6px;
+.ap-display {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
-.placeholder {
-  margin-top: 32px;
-  opacity: 0.5;
+.ap-pip {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(108, 92, 231, 0.4);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.ap-pip--filled {
+  background: #6c5ce7;
+  border-color: #a29bfe;
+}
+
+.ap-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-left: 4px;
+  color: #a29bfe;
+}
+
+.pass-time-btn {
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px dashed #f39c12;
+  border-radius: 6px;
+  background: rgba(243, 156, 18, 0.1);
+  color: #f39c12;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pass-time-btn:hover {
+  background: rgba(243, 156, 18, 0.2);
 }

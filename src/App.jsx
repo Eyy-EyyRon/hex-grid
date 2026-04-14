@@ -1,20 +1,16 @@
 import { useAuth } from "./hooks/useAuth";
+import { useMap } from "./hooks/useMap";
 import HexGrid from "./components/HexGrid";
+import { PLAYER_COLORS, canClaimTile } from "./gameLogic";
+import { db } from "./firebase";
+import { doc, writeBatch, updateDoc, serverTimestamp } from "firebase/firestore";
 import "./App.css";
 
-const PLAYER_COLORS = [
-  "#e74c3c",
-  "#3498db",
-  "#2ecc71",
-  "#f1c40f",
-  "#9b59b6",
-  "#e67e22",
-  "#1abc9c",
-  "#e84393",
-];
-
 function App() {
-  const { user, userData, loading, login } = useAuth();
+  const { user, userData, setUserData, loading: authLoading, login } = useAuth();
+  const { tiles, setTiles, uidColorMap, loading: mapLoading } = useMap();
+
+  const loading = authLoading || mapLoading;
 
   if (loading) {
     return (
@@ -36,22 +32,85 @@ function App() {
     );
   }
 
+  const ap = userData?.ap ?? 0;
   const color = PLAYER_COLORS[userData?.colorIndex ?? 0];
+
+  const handleClaimTile = async (q, r) => {
+    if (!tiles || !userData) return;
+    if (!canClaimTile(q, r, tiles, user.uid, ap)) {
+      console.log(`Cannot claim (${q},${r}): invalid move or 0 AP`);
+      return;
+    }
+
+    const key = `${q},${r}`;
+
+    // Optimistic UI update
+    setTiles((prev) => ({ ...prev, [key]: user.uid }));
+    setUserData((prev) => ({ ...prev, ap: prev.ap - 1 }));
+
+    try {
+      const batch = writeBatch(db);
+      batch.update(doc(db, "users", user.uid), {
+        ap: ap - 1,
+      });
+      batch.update(doc(db, "map_chunks", "chunk_0_0"), {
+        [`tiles.${key}`]: user.uid,
+      });
+      await batch.commit();
+    } catch (err) {
+      console.error("Claim failed, rolling back:", err);
+      // Rollback optimistic update
+      setTiles((prev) => ({ ...prev, [key]: "empty" }));
+      setUserData((prev) => ({ ...prev, ap: prev.ap + 1 }));
+    }
+  };
+
+  const handlePassTime = async () => {
+    setUserData((prev) => ({ ...prev, ap: 5 }));
+    try {
+      await updateDoc(doc(db, "users", user.uid), {
+        ap: 5,
+        lastLoginTime: serverTimestamp(),
+      });
+    } catch (err) {
+      console.error("Pass time failed:", err);
+      setUserData((prev) => ({ ...prev, ap: userData.ap }));
+    }
+  };
 
   return (
     <div className="screen">
       <h1 className="title">Hex Territory</h1>
-      <div className="user-info">
-        <span
-          className="color-swatch"
-          style={{ backgroundColor: color }}
-        />
-        <span>
-          Player: <strong>{user.uid.slice(0, 8)}...</strong>
-        </span>
-        <span className="ap-badge">AP: {userData?.ap ?? 0}</span>
+
+      <div className="game-bar">
+        <div className="user-info">
+          <span className="color-swatch" style={{ backgroundColor: color }} />
+          <span>
+            Player: <strong>{user.uid.slice(0, 8)}...</strong>
+          </span>
+        </div>
+
+        <div className="ap-display">
+          {[...Array(5)].map((_, i) => (
+            <span
+              key={i}
+              className={`ap-pip${i < ap ? " ap-pip--filled" : ""}`}
+            />
+          ))}
+          <span className="ap-label">{ap} AP</span>
+        </div>
+
+        <button className="pass-time-btn" onClick={handlePassTime}>
+          Pass Time (Dev)
+        </button>
       </div>
-      <HexGrid />
+
+      <HexGrid
+        tiles={tiles}
+        uidColorMap={uidColorMap}
+        onHexClick={handleClaimTile}
+        currentUid={user.uid}
+      />
     </div>
   );
 }
