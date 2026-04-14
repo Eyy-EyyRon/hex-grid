@@ -5,9 +5,9 @@ import { generateGrid } from "../gameLogic";
 
 export function useMap() {
   const [tiles, setTiles] = useState(null);
-  const [uidColorMap, setUidColorMap] = useState({});
+  const [playerInfo, setPlayerInfo] = useState({});
   const [loading, setLoading] = useState(true);
-  const colorCacheRef = useRef({});
+  const cacheRef = useRef({});
 
   useEffect(() => {
     const chunkRef = doc(db, "map_chunks", "chunk_0_0");
@@ -16,7 +16,6 @@ export function useMap() {
       if (snap.exists()) {
         setTiles(snap.data().tiles);
       } else {
-        // Seed the chunk with all-empty tiles
         const emptyTiles = {};
         generateGrid().forEach(({ q, r }) => {
           emptyTiles[`${q},${r}`] = "empty";
@@ -29,14 +28,13 @@ export function useMap() {
     return unsubscribe;
   }, []);
 
-  // Fetch colorIndex for any new UIDs that appear in tiles
   useEffect(() => {
     if (!tiles) return;
 
     const uids = [
       ...new Set(Object.values(tiles).filter((v) => v !== "empty")),
     ];
-    const missing = uids.filter((uid) => !(uid in colorCacheRef.current));
+    const missing = uids.filter((uid) => !(uid in cacheRef.current));
     if (missing.length === 0) return;
 
     Promise.all(
@@ -45,13 +43,18 @@ export function useMap() {
       const newEntries = {};
       snaps.forEach((snap) => {
         if (snap.exists()) {
-          newEntries[snap.id] = snap.data().colorIndex;
+          const d = snap.data();
+          newEntries[snap.id] = {
+            colorIndex: d.colorIndex,
+            displayName: d.displayName || "Unknown",
+            photoURL: d.photoURL || "",
+          };
         }
       });
-      colorCacheRef.current = { ...colorCacheRef.current, ...newEntries };
-      setUidColorMap({ ...colorCacheRef.current });
+      cacheRef.current = { ...cacheRef.current, ...newEntries };
+      setPlayerInfo({ ...cacheRef.current });
     });
   }, [tiles]);
 
-  return { tiles, setTiles, uidColorMap, loading };
+  return { tiles, setTiles, playerInfo, loading };
 }

@@ -23,15 +23,15 @@ function axialToPixel(q, r) {
   return { x, y };
 }
 
-function getTileFill(key, tiles, uidColorMap) {
+function getTileFill(key, tiles, playerInfo) {
   if (!tiles) return EMPTY_FILL;
   const owner = tiles[key];
   if (!owner || owner === "empty") return EMPTY_FILL;
-  const colorIndex = uidColorMap[owner];
-  return colorIndex !== undefined ? PLAYER_COLORS[colorIndex] : "#555";
+  const info = playerInfo[owner];
+  return info ? PLAYER_COLORS[info.colorIndex] : "#555";
 }
 
-export default function HexGrid({ tiles, uidColorMap, onHexClick, currentUid }) {
+export default function HexGrid({ tiles, playerInfo, onHexClick, currentUid }) {
   const cells = useMemo(() => generateGrid(), []);
 
   const padding = HEX_SIZE + 4;
@@ -51,7 +51,7 @@ export default function HexGrid({ tiles, uidColorMap, onHexClick, currentUid }) 
         {cells.map(({ q, r }) => {
           const key = `${q},${r}`;
           const { x, y } = axialToPixel(q, r);
-          const fill = getTileFill(key, tiles, uidColorMap);
+          const fill = getTileFill(key, tiles, playerInfo);
           const isOwn = tiles && tiles[key] === currentUid;
           return (
             <polygon

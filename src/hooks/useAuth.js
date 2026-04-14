@@ -5,7 +5,7 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged,
 } from "firebase/auth";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
 
 const PLAYER_COLORS = [
@@ -34,7 +34,11 @@ export function useAuth() {
       }
       if (firebaseUser) {
         setUser(firebaseUser);
-        const userDoc = await ensureUserDocument(firebaseUser.uid);
+        const userDoc = await ensureUserDocument(
+          firebaseUser.uid,
+          firebaseUser.displayName,
+          firebaseUser.photoURL
+        );
         setUserData(userDoc);
       } else {
         setUser(null);
@@ -55,21 +59,38 @@ export function useAuth() {
     }
   };
 
-  return { user, userData, setUserData, loading, loginGoogle };
+  const logout = async () => {
+    await signOut(auth);
+  };
+
+  return { user, userData, setUserData, loading, loginGoogle, logout };
 }
 
-async function ensureUserDocument(uid) {
+async function ensureUserDocument(uid, displayName, photoURL) {
   const userRef = doc(db, "users", uid);
   const snap = await getDoc(userRef);
 
   if (snap.exists()) {
-    return snap.data();
+    const data = snap.data();
+    if (data.displayName !== displayName || data.photoURL !== photoURL) {
+      await updateDoc(userRef, {
+        displayName: displayName || "Unknown",
+        photoURL: photoURL || "",
+      });
+    }
+    return {
+      ...data,
+      displayName: displayName || data.displayName || "Unknown",
+      photoURL: photoURL || data.photoURL || "",
+    };
   }
 
   const newUser = {
     colorIndex: Math.floor(Math.random() * PLAYER_COLORS.length),
     ap: 5,
     lastLoginTime: serverTimestamp(),
+    displayName: displayName || "Unknown",
+    photoURL: photoURL || "",
   };
 
   await setDoc(userRef, newUser);
