@@ -69,9 +69,9 @@ function App() {
 
 function LoadingScreen({ text }) {
   return (
-    <div className="screen screen--center">
-      <div className="spinner" />
-      <p className="loading-text">{text}</p>
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_center,#0d0a1a,#03071e_70%,#000)] flex flex-col items-center justify-center gap-4">
+      <div className="w-10 h-10 border-[3px] border-[#6a040f]/40 border-t-[#ffba08] rounded-full animate-spin" />
+      <p className="text-sm text-[#faa307]/50 font-medium">{text}</p>
     </div>
   );
 }
@@ -80,31 +80,45 @@ function LoadingScreen({ text }) {
 
 function LoginScreen({ loginGoogle }) {
   return (
-    <div className="modal-backdrop">
-      <div className="modal">
-        <div className="modal-hex-icon">⬡</div>
-        <h1 className="modal-title">Hex Territory</h1>
-        <p className="modal-subtitle">Capture the grid. Claim your territory.</p>
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_center,#0d0a1a,#03071e_70%,#000)] flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-[#9d0208]/[0.07] blur-[120px] animate-float" />
+        <div className="absolute bottom-[-15%] right-[-5%] w-[500px] h-[500px] rounded-full bg-[#e85d04]/[0.05] blur-[120px] animate-float [animation-delay:-7s]" />
+      </div>
 
-        <button className="google-btn" onClick={loginGoogle}>
-          <svg className="google-icon" viewBox="0 0 24 24">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-          Sign in with Google
-        </button>
+      <div className="relative w-full max-w-md">
+        <div className="absolute -inset-4 bg-gradient-to-br from-[#d00000]/[0.06] to-[#e85d04]/[0.06] rounded-3xl blur-2xl pointer-events-none" />
+        <div className="relative w-full p-8 rounded-2xl bg-[#370617]/30 border border-[#6a040f]/30 backdrop-blur-md shadow-[0_24px_80px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col items-center gap-5 animate-[modal-in_0.3s_ease-out]">
 
-        <div className="how-to-play">
-          <h2>How to Play</h2>
-          <ol>
-            <li><strong>Claim your first tile</strong> — click any empty hex.</li>
-            <li><strong>Expand outward</strong> — each new tile must touch yours.</li>
-            <li><strong>Spend Action Points</strong> — 1 AP per tile, 5 max.</li>
-            <li><strong>Eliminate rivals</strong> — take all their hexes!</li>
-            <li><strong>Last one standing wins!</strong></li>
-          </ol>
+          <span className="text-6xl leading-none text-[#ffba08] drop-shadow-[0_0_24px_rgba(255,186,8,0.5)]">{"\u2B21"}</span>
+          <h1 className="text-[2.4rem] font-black tracking-tight bg-gradient-to-r from-[#f48c06] to-[#ffba08] bg-clip-text text-transparent leading-tight drop-shadow-[0_0_15px_rgba(255,186,8,0.4)]">
+            Hex Territory
+          </h1>
+          <p className="text-sm text-[#faa307]/50 -mt-2 font-medium">Capture the grid. Claim your territory.</p>
+
+          <button
+            className="w-full flex items-center justify-center gap-3 py-3.5 rounded-lg bg-white text-[#03071e] font-bold text-[1.05rem] hover:bg-slate-100 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-[0.97] transition-all duration-200 cursor-pointer"
+            onClick={loginGoogle}
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Sign in with Google
+          </button>
+
+          <div className="w-full mt-2 rounded-xl bg-[#03071e]/60 border border-[#6a040f]/20 p-5">
+            <h2 className="text-[0.7rem] font-bold text-[#9d0208]/60 uppercase tracking-[0.15em] text-center mb-3">How to Play</h2>
+            <ol className="flex flex-col gap-2 pl-4 list-decimal marker:text-[#e85d04]/60">
+              <li className="text-[0.82rem] text-slate-400 leading-relaxed"><strong className="text-slate-300">Claim your first tile</strong> — click any empty hex.</li>
+              <li className="text-[0.82rem] text-slate-400 leading-relaxed"><strong className="text-slate-300">Expand outward</strong> — each new tile must touch yours.</li>
+              <li className="text-[0.82rem] text-slate-400 leading-relaxed"><strong className="text-slate-300">Spend Action Points</strong> — 1 AP per tile, 5 max.</li>
+              <li className="text-[0.82rem] text-slate-400 leading-relaxed"><strong className="text-slate-300">Eliminate rivals</strong> — take all their hexes!</li>
+              <li className="text-[0.82rem] text-slate-400 leading-relaxed"><strong className="text-slate-300">Last one standing wins!</strong></li>
+            </ol>
+          </div>
         </div>
       </div>
     </div>
@@ -125,27 +139,37 @@ function UsernameModal({ defaultName, onSave }) {
   };
 
   return (
-    <div className="modal-backdrop">
-      <div className="modal">
-        <div className="modal-hex-icon">{"\u2B21"}</div>
-        <h1 className="modal-title">Choose Username</h1>
-        <p className="modal-subtitle">Pick a name for the battlefield (max 12 chars)</p>
-        <input
-          className="username-input"
-          placeholder="Username"
-          maxLength={12}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSave()}
-          autoFocus
-        />
-        <button
-          className="primary-btn"
-          onClick={handleSave}
-          disabled={saving || !name.trim()}
-        >
-          {saving ? "Saving..." : "Continue"}
-        </button>
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_center,#0d0a1a,#03071e_70%,#000)] flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-[#9d0208]/[0.07] blur-[120px] animate-float" />
+        <div className="absolute bottom-[-15%] right-[-5%] w-[500px] h-[500px] rounded-full bg-[#e85d04]/[0.05] blur-[120px] animate-float [animation-delay:-7s]" />
+      </div>
+
+      <div className="relative w-full max-w-md">
+        <div className="absolute -inset-4 bg-gradient-to-br from-[#d00000]/[0.06] to-[#e85d04]/[0.06] rounded-3xl blur-2xl pointer-events-none" />
+        <div className="relative w-full p-8 rounded-2xl bg-[#370617]/30 border border-[#6a040f]/30 backdrop-blur-md shadow-[0_24px_80px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col items-center gap-5 animate-[modal-in_0.3s_ease-out]">
+
+          <span className="text-5xl leading-none text-[#ffba08] drop-shadow-[0_0_20px_rgba(255,186,8,0.5)]">{"\u2B21"}</span>
+          <h1 className="text-2xl font-black tracking-tight text-white">Choose Username</h1>
+          <p className="text-sm text-[#faa307]/50 -mt-2 font-medium">Pick a name for the battlefield (max 12 chars)</p>
+
+          <input
+            className="w-full px-4 py-3.5 rounded-lg bg-[#03071e]/80 border border-[#6a040f]/30 text-white font-bold text-center text-lg tracking-wide placeholder:text-[#6a040f]/60 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-[#f48c06]/40 focus:border-[#e85d04]/40 transition-all"
+            placeholder="Username"
+            maxLength={12}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSave()}
+            autoFocus
+          />
+          <button
+            className="w-full py-3 rounded-lg font-bold tracking-wide text-white bg-gradient-to-r from-[#d00000] via-[#e85d04] to-[#f48c06] hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(232,93,4,0.4)] active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            onClick={handleSave}
+            disabled={saving || !name.trim()}
+          >
+            {saving ? "Saving..." : "Continue"}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -469,146 +493,177 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
 
   /* ── Render ── */
   return (
-    <div className="game-layout">
+    <div className="flex flex-col min-h-screen bg-[radial-gradient(ellipse_at_top,#0d0a1a,#03071e_60%,#000)]">
       {isSpectator && match.status === "playing" && (
-        <div className="spectator-banner">YOU WERE ELIMINATED &mdash; SPECTATING</div>
+        <div className="text-center py-2.5 px-4 text-sm font-extrabold tracking-wider text-white uppercase bg-gradient-to-r from-[#9d0208] to-[#d00000] shadow-[0_2px_12px_rgba(157,2,8,0.3)]">
+          YOU WERE ELIMINATED &mdash; SPECTATING
+        </div>
       )}
 
-      <header className="header">
-        <div className="header-left">
-          <span className="header-logo">⬡</span>
-          <h1 className="header-title">Hex Territory</h1>
-          <span className="header-code">{match.id}</span>
+      {/* ── Header ── */}
+      <header className="flex items-center justify-between px-5 py-2.5 bg-[#370617]/20 border-b border-[#6a040f]/20 backdrop-blur-sm flex-wrap gap-2.5">
+        <div className="flex items-center gap-2">
+          <span className="text-xl text-[#ffba08] leading-none drop-shadow-[0_0_8px_rgba(255,186,8,0.4)]">{"\u2B21"}</span>
+          <h1 className="text-base font-bold text-white/90 tracking-tight hidden sm:block">Hex Territory</h1>
+          <span className="text-[0.7rem] font-extrabold tracking-[0.15em] text-[#faa307] bg-[#faa307]/10 px-2 py-0.5 rounded font-mono">{match.id}</span>
         </div>
 
-        <div className="header-center">
+        <div className="flex items-center">
           {!isSpectator ? (
-            <div className={`ap-display${ap >= MAX_AP ? " ap-display--full" : ""}${apShake ? " ap-display--shake" : ""}`}>
+            <div className={`flex items-center gap-1.5${apShake ? " animate-[shake_0.4s_ease-out]" : ""}`}>
               {[...Array(5)].map((_, i) => (
-                <span key={i} className={`ap-pip${i < ap ? " ap-pip--filled" : ""}`} />
+                <span
+                  key={i}
+                  className={`inline-block w-3.5 h-3.5 rounded-full border-2 transition-all duration-250 ${
+                    i < ap
+                      ? `bg-[#faa307] border-[#ffba08] shadow-[0_0_6px_rgba(250,163,7,0.5)]${ap >= MAX_AP ? " animate-[ap-pulse_2s_ease-in-out_infinite]" : ""}`
+                      : "bg-white/[0.06] border-[#6a040f]/40"
+                  }`}
+                />
               ))}
-              <span className="ap-label">{ap} AP</span>
-              {countdownStr && <span className="ap-timer">+1 in {countdownStr}</span>}
+              <span className="font-bold text-sm ml-1.5 text-[#ffba08]">{ap} AP</span>
+              {countdownStr && (
+                <span className="text-[0.75rem] font-semibold text-[#f48c06] ml-2 bg-[#e85d04]/10 px-2 py-0.5 rounded tabular-nums">+1 in {countdownStr}</span>
+              )}
             </div>
           ) : (
-            <span className="spectator-label">Spectating</span>
+            <span className="text-sm font-bold text-[#d00000] uppercase tracking-wider">Spectating</span>
           )}
         </div>
 
-        <div className="header-right">
+        <div className="flex items-center gap-2.5">
           {user.photoURL && (
-            <img className="avatar" src={user.photoURL} alt="" referrerPolicy="no-referrer" />
+            <img className="w-7 h-7 rounded-full object-cover border-2 border-[#6a040f]/40" src={user.photoURL} alt="" referrerPolicy="no-referrer" />
           )}
-          <span className="header-name">{user.displayName || "Player"}</span>
-          <span className="color-dot" style={{ backgroundColor: color }} />
-          <button className="sign-out-btn" onClick={() => onNavigate("home")}>Leave</button>
+          <span className="text-sm text-slate-300 max-w-[120px] truncate hidden sm:block">{user.displayName || "Player"}</span>
+          <span className="w-3 h-3 rounded-full border-2 border-white/20 shrink-0" style={{ backgroundColor: color }} />
+          <button
+            className="px-3 py-1.5 text-[0.75rem] font-semibold rounded-md border border-[#6a040f]/30 bg-[#370617]/30 text-slate-400 hover:bg-[#6a040f]/20 hover:text-white transition-all cursor-pointer"
+            onClick={() => onNavigate("home")}
+          >Leave</button>
         </div>
       </header>
 
+      {/* ── Mode-specific bars ── */}
       {match.gameMode === "gold_rush" && match.status === "playing" && !isSpectator && (
-        <div className="gold-bar">
-          <span className="gold-bar-text">
+        <div className="flex items-center justify-center h-9 bg-[#ffba08]/[0.06] border-b border-[#f48c06]/15">
+          <span className="text-sm font-extrabold text-[#ffba08] tracking-wide">
             {"\u2B50"} Gold: {players[user.uid]?.score || 0} / 5
           </span>
         </div>
       )}
 
       {match.gameMode === "blitz" && match.status === "playing" && (
-        <div className={`blitz-bar${blitzRemaining <= 10 ? " blitz-bar--danger" : ""}`}>
-          <span className="blitz-clock">{formatCountdown(Math.ceil(blitzRemaining))}</span>
-          <span className="blitz-label">BLITZ</span>
+        <div className={`flex items-center justify-center gap-3 h-11 border-b transition-colors ${
+          blitzRemaining <= 10
+            ? "bg-[#d00000]/10 border-[#d00000]/20 animate-[blitz-flash_0.5s_ease-in-out_infinite]"
+            : "bg-[#e85d04]/[0.06] border-[#e85d04]/15"
+        }`}>
+          <span className={`text-2xl font-black tabular-nums tracking-wider ${blitzRemaining <= 10 ? "text-[#d00000]" : "text-[#f48c06]"}`}>
+            {formatCountdown(Math.ceil(blitzRemaining))}
+          </span>
+          <span className={`text-[0.7rem] font-extrabold tracking-[0.15em] uppercase ${blitzRemaining <= 10 ? "text-[#9d0208]" : "text-[#e85d04]"}`}>BLITZ</span>
         </div>
       )}
 
       {match.gameMode === "koth" && match.kothOwner && match.status === "playing" && (
-        <div className="koth-bar">
+        <div className="relative w-full h-10 bg-[#ffba08]/[0.06] border-b border-[#f48c06]/15 overflow-hidden">
           <div
-            className="koth-bar-fill"
+            className="absolute top-0 left-0 bottom-0 transition-[width] duration-150 ease-linear opacity-35"
             style={{ width: `${(kothElapsed / 30) * 100}%`, backgroundColor: kothOwnerColor }}
           />
-          <span className="koth-bar-text">
+          <span className="relative flex items-center justify-center h-full text-sm font-bold text-[#ffba08] z-[1] drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">
             {match.kothOwner === user.uid ? "You hold" : `${kothOwnerName} holds`} the Hill
             &nbsp;&mdash;&nbsp;{Math.ceil(30 - kothElapsed)}s
           </span>
         </div>
       )}
 
+      {/* ── Status hint ── */}
       {!isSpectator && (hint || statusMessage) && (
-        <p className={`status-msg${
+        <p className={`text-center py-2 px-4 text-sm font-medium border-b border-[#6a040f]/10 ${
           hint
-            ? hint.type === "action" ? " status-msg--action"
-              : hint.type === "warn" ? " status-msg--warn"
-              : " status-msg--info"
-            : ap === 0 ? " status-msg--warn" : ""
+            ? hint.type === "action" ? "text-[#faa307] bg-[#e85d04]/[0.06]"
+              : hint.type === "warn" ? "text-[#dc2f02] bg-[#d00000]/[0.06]"
+              : "text-slate-500 bg-[#370617]/10"
+            : ap === 0 ? "text-[#dc2f02] bg-[#d00000]/[0.06]" : "text-slate-500 bg-[#370617]/10"
         }`}>
           {hint ? hint.text : statusMessage}
         </p>
       )}
 
-      <main className="main-content">
-        <div className="grid-panel">
+      {/* ── Main content ── */}
+      <main className="flex flex-1 max-md:flex-col">
+        <div className="flex-1 flex items-start justify-center p-6 min-w-0 max-md:p-4 max-sm:p-1.5">
           <HexGrid tiles={tiles} playerInfo={players} onHexClick={handleClaimTile} currentUid={user.uid} visibleSet={visibleSet} onHexHover={setHoveredHex} gameMode={match.gameMode} />
         </div>
-        <aside className="sidebar">
+
+        <aside className="w-[280px] shrink-0 p-5 border-l border-[#6a040f]/15 bg-[#370617]/10 flex flex-col gap-4 max-md:w-full max-md:border-l-0 max-md:border-t max-md:border-[#6a040f]/15 max-md:max-w-[400px] max-md:self-center max-sm:p-3">
           <Leaderboard tiles={tiles} playerInfo={players} currentUid={user.uid} gameMode={match.gameMode} />
 
-          <div className="guide">
-            <button className="guide-toggle" onClick={() => setGuideOpen((p) => !p)}>
+          {/* Game Guide */}
+          <div className="rounded-xl bg-[#03071e]/40 border border-[#6a040f]/20 overflow-hidden">
+            <button
+              className="w-full px-4 py-3 flex items-center justify-between bg-transparent border-none text-slate-300 text-[0.8rem] font-bold uppercase tracking-wider cursor-pointer hover:bg-[#6a040f]/10 transition-colors"
+              onClick={() => setGuideOpen((p) => !p)}
+            >
               <span>Game Guide</span>
-              <span>{guideOpen ? "\u25BE" : "\u25B8"}</span>
+              <span className="text-[#6a040f]">{guideOpen ? "\u25BE" : "\u25B8"}</span>
             </button>
             {guideOpen && (
-              <div className="guide-content">
-                <div className="guide-row">
-                  <span className="guide-swatch" style={{ background: '#2d2d44' }} />
-                  <span>Empty tile</span>
-                  <span className="guide-cost">1 AP</span>
-                </div>
-                <div className="guide-row">
-                  <span className="guide-swatch" style={{ background: color }} />
-                  <span>Your tile — tap to fortify</span>
-                  <span className="guide-cost">3 AP</span>
-                </div>
-                <div className="guide-row">
-                  <span className="guide-swatch guide-swatch--fort" style={{ background: color }} />
-                  <span>Fortified (extra defense)</span>
-                  <span className="guide-cost">—</span>
-                </div>
-                <div className="guide-row">
-                  <span className="guide-swatch" style={{ background: '#e74c3c' }} />
-                  <span>Enemy tile — attack</span>
-                  <span className="guide-cost">3 AP</span>
-                </div>
-                <div className="guide-row">
-                  <span className="guide-swatch guide-swatch--fort" style={{ background: '#e74c3c' }} />
-                  <span>Enemy fortified — break</span>
-                  <span className="guide-cost">5 AP</span>
-                </div>
-                <div className="guide-row">
-                  <span className="guide-swatch" style={{ background: '#15151f' }} />
-                  <span>Fog of war (hidden)</span>
-                  <span className="guide-cost">—</span>
-                </div>
+              <div className="px-4 pb-3 flex flex-col gap-2">
+                {[
+                  { bg: '#1a1028', label: 'Empty tile', cost: '1 AP' },
+                  { bg: color, label: 'Your tile — tap to fortify', cost: '3 AP' },
+                  { bg: color, label: 'Fortified (extra defense)', cost: '—', fort: true },
+                  { bg: '#9d0208', label: 'Enemy tile — attack', cost: '3 AP' },
+                  { bg: '#9d0208', label: 'Enemy fortified — break', cost: '5 AP', fort: true },
+                  { bg: '#03071e', label: 'Fog of war (hidden)', cost: '—' },
+                ].map((row, i) => (
+                  <div key={i} className="flex items-center gap-2.5 text-[0.82rem] text-slate-400">
+                    <span
+                      className={`w-[18px] h-[18px] rounded shrink-0 border-[1.5px] border-[#6a040f]/40${row.fort ? " relative" : ""}`}
+                      style={{ background: row.bg }}
+                    >
+                      {row.fort && <span className="absolute inset-[3px] border-[1.5px] border-white/50 rounded-sm" />}
+                    </span>
+                    <span className="flex-1">{row.label}</span>
+                    <span className="text-[#faa307] text-[0.75rem] font-bold ml-auto whitespace-nowrap">{row.cost}</span>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         </aside>
       </main>
 
+      {/* ── Game Over Overlay ── */}
       {match.status === "finished" && (
-        <div className="gameover-overlay">
-          <div className="gameover-card">
-            <h1 className="gameover-title">GAME OVER</h1>
-            <div className="gameover-winner">
-              <span className="gameover-swatch" style={{ backgroundColor: winnerColor }} />
-              <span className="gameover-name">{isWinner ? "YOU WON!" : `${winnerName} wins!`}</span>
+        <div className="fixed inset-0 flex items-center justify-center bg-[#03071e]/90 backdrop-blur-md z-[200] animate-[modal-in_0.35s_ease-out]">
+          <div className="relative w-full max-w-sm mx-4">
+            <div className="absolute -inset-6 bg-gradient-to-br from-[#d00000]/10 to-[#e85d04]/10 rounded-3xl blur-2xl pointer-events-none" />
+            <div className="relative flex flex-col items-center gap-6 p-10 rounded-2xl bg-[#370617]/40 border border-[#6a040f]/30 backdrop-blur-md shadow-[0_24px_80px_rgba(0,0,0,0.6)]">
+              <h1 className="text-4xl font-black tracking-wider bg-gradient-to-r from-[#f48c06] to-[#ffba08] bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(255,186,8,0.3)]">GAME OVER</h1>
+              <div className="flex items-center gap-4">
+                <span
+                  className="w-9 h-9 rounded-full border-[3px] border-white/20 shadow-[0_0_12px_var(--glow)]"
+                  style={{ backgroundColor: winnerColor, '--glow': winnerColor + '66' }}
+                />
+                <span className="text-xl font-bold text-slate-200">{isWinner ? "YOU WON!" : `${winnerName} wins!`}</span>
+              </div>
+              {isHost && (
+                <button
+                  className="w-full py-3 rounded-lg font-bold tracking-wide text-white bg-gradient-to-r from-[#d00000] via-[#e85d04] to-[#f48c06] hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(232,93,4,0.4)] active:scale-[0.97] transition-all duration-200 cursor-pointer"
+                  onClick={() => playAgain(match.id, players)}
+                >
+                  Play Again
+                </button>
+              )}
+              <button
+                className="text-sm text-[#6a040f] hover:text-[#faa307] transition-colors underline-offset-4 hover:underline cursor-pointer bg-transparent border-none"
+                onClick={() => onNavigate("home")}
+              >Leave</button>
             </div>
-            {isHost && (
-              <button className="primary-btn" onClick={() => playAgain(match.id, players)}>
-                Play Again
-              </button>
-            )}
-            <button className="sign-out-btn" onClick={() => onNavigate("home")}>Leave</button>
           </div>
         </div>
       )}
