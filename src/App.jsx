@@ -111,6 +111,50 @@ function formatCountdown(s) {
   return `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
 }
 
+/* ─── Tile Hint ─── */
+
+function getHintForTile(q, r, tiles, uid, ap) {
+  const key = `${q},${r}`;
+  const raw = tiles[key];
+  if (raw === undefined) return null;
+
+  const { owner, fortified } = parseTile(raw);
+  const ownsAny = Object.values(tiles).some((v) => parseTile(v).owner === uid);
+
+  if (!owner) {
+    if (!ownsAny) {
+      return ap >= 1
+        ? { text: "Claim starting tile \u2014 1 AP", type: "action" }
+        : { text: "Need 1 AP to claim", type: "warn" };
+    }
+    const adj = getNeighborKeys(q, r).some((nk) => parseTile(tiles[nk] || "").owner === uid);
+    if (!adj) return { text: "Must be adjacent to your territory", type: "warn" };
+    return ap >= 1
+      ? { text: "Claim empty tile \u2014 1 AP", type: "action" }
+      : { text: "Need 1 AP to claim", type: "warn" };
+  }
+
+  if (owner === uid) {
+    if (fortified) return { text: "Your tile (fortified)", type: "info" };
+    return ap >= 3
+      ? { text: "Fortify your tile \u2014 3 AP", type: "action" }
+      : { text: "Fortify \u2014 need 3 AP", type: "warn" };
+  }
+
+  const adj = getNeighborKeys(q, r).some((nk) => parseTile(tiles[nk] || "").owner === uid);
+  if (!adj) return { text: "Must be adjacent to attack", type: "warn" };
+
+  if (fortified) {
+    return ap >= 5
+      ? { text: "Attack fortified tile \u2014 5 AP", type: "action" }
+      : { text: "Attack fortified \u2014 need 5 AP", type: "warn" };
+  }
+
+  return ap >= 3
+    ? { text: "Attack enemy tile \u2014 3 AP", type: "action" }
+    : { text: "Attack \u2014 need 3 AP", type: "warn" };
+}
+
 /* ─── Game View ─── */
 
 function GameView({ user, userData, setUserData, match, onNavigate }) {
@@ -195,6 +239,15 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
     return "Full AP! Expand your territory.";
   }, [tiles, user.uid, ap, isSpectator, match.status]);
 
+  /* ── Hover hint ── */
+  const [hoveredHex, setHoveredHex] = useState(null);
+  const [guideOpen, setGuideOpen] = useState(false);
+
+  const hint = useMemo(() => {
+    if (!hoveredHex || isSpectator || match.status !== "playing") return null;
+    return getHintForTile(hoveredHex.q, hoveredHex.r, tiles, user.uid, ap);
+  }, [hoveredHex, tiles, user.uid, ap, isSpectator, match.status]);
+
   /* ── Claim handler ── */
   const [apShake, setApShake] = useState(false);
 
@@ -260,16 +313,65 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
         </div>
       </header>
 
-      {!isSpectator && statusMessage && (
-        <p className={`status-msg${ap === 0 ? " status-msg--warn" : ""}`}>{statusMessage}</p>
+      {!isSpectator && (hint || statusMessage) && (
+        <p className={`status-msg${
+          hint
+            ? hint.type === "action" ? " status-msg--action"
+              : hint.type === "warn" ? " status-msg--warn"
+              : " status-msg--info"
+            : ap === 0 ? " status-msg--warn" : ""
+        }`}>
+          {hint ? hint.text : statusMessage}
+        </p>
       )}
 
       <main className="main-content">
         <div className="grid-panel">
-          <HexGrid tiles={tiles} playerInfo={players} onHexClick={handleClaimTile} currentUid={user.uid} visibleSet={visibleSet} />
+          <HexGrid tiles={tiles} playerInfo={players} onHexClick={handleClaimTile} currentUid={user.uid} visibleSet={visibleSet} onHexHover={setHoveredHex} />
         </div>
         <aside className="sidebar">
           <Leaderboard tiles={tiles} playerInfo={players} currentUid={user.uid} />
+
+          <div className="guide">
+            <button className="guide-toggle" onClick={() => setGuideOpen((p) => !p)}>
+              <span>Game Guide</span>
+              <span>{guideOpen ? "\u25BE" : "\u25B8"}</span>
+            </button>
+            {guideOpen && (
+              <div className="guide-content">
+                <div className="guide-row">
+                  <span className="guide-swatch" style={{ background: '#2d2d44' }} />
+                  <span>Empty tile</span>
+                  <span className="guide-cost">1 AP</span>
+                </div>
+                <div className="guide-row">
+                  <span className="guide-swatch" style={{ background: color }} />
+                  <span>Your tile — tap to fortify</span>
+                  <span className="guide-cost">3 AP</span>
+                </div>
+                <div className="guide-row">
+                  <span className="guide-swatch guide-swatch--fort" style={{ background: color }} />
+                  <span>Fortified (extra defense)</span>
+                  <span className="guide-cost">—</span>
+                </div>
+                <div className="guide-row">
+                  <span className="guide-swatch" style={{ background: '#e74c3c' }} />
+                  <span>Enemy tile — attack</span>
+                  <span className="guide-cost">3 AP</span>
+                </div>
+                <div className="guide-row">
+                  <span className="guide-swatch guide-swatch--fort" style={{ background: '#e74c3c' }} />
+                  <span>Enemy fortified — break</span>
+                  <span className="guide-cost">5 AP</span>
+                </div>
+                <div className="guide-row">
+                  <span className="guide-swatch" style={{ background: '#15151f' }} />
+                  <span>Fog of war (hidden)</span>
+                  <span className="guide-cost">—</span>
+                </div>
+              </div>
+            )}
+          </div>
         </aside>
       </main>
 

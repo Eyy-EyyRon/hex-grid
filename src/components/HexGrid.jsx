@@ -31,7 +31,7 @@ function getTileFill(key, tiles, playerInfo) {
   return info ? PLAYER_COLORS[info.colorIndex] : "#555";
 }
 
-export default function HexGrid({ tiles, playerInfo, onHexClick, currentUid, visibleSet }) {
+export default function HexGrid({ tiles, playerInfo, onHexClick, currentUid, visibleSet, onHexHover }) {
   const cells = useMemo(() => generateGrid(), []);
   const svgRef = useRef(null);
   const gestureRef = useRef({ panning: false, sx: 0, sy: 0, moved: false });
@@ -62,7 +62,6 @@ export default function HexGrid({ tiles, playerInfo, onHexClick, currentUid, vis
   const onPointerDown = useCallback((e) => {
     if (e.button !== 0) return;
     gestureRef.current = { panning: true, sx: e.clientX, sy: e.clientY, moved: false };
-    svgRef.current?.setPointerCapture(e.pointerId);
   }, []);
 
   const onPointerMove = useCallback((e) => {
@@ -182,7 +181,9 @@ export default function HexGrid({ tiles, playerInfo, onHexClick, currentUid, vis
           const isOwn = owner === currentUid;
 
           return (
-            <g key={key} onClick={() => handleClick(q, r)}>
+            <g key={key} onClick={() => handleClick(q, r)}
+               onPointerEnter={() => onHexHover?.({ q, r })}
+               onPointerLeave={() => onHexHover?.(null)}>
               <polygon
                 points={hexCorners(x, y, HEX_SIZE - 2)}
                 className={`hex-cell${isOwn ? " hex-cell--own" : ""}`}

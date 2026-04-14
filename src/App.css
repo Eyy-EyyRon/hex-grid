@@ -254,9 +254,19 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
+.status-msg--action {
+  color: #a29bfe;
+  background: rgba(108, 92, 231, 0.1);
+}
+
 .status-msg--warn {
   color: #f39c12;
   background: rgba(243, 156, 18, 0.08);
+}
+
+.status-msg--info {
+  color: #777;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 /* ===== Main content ===== */
@@ -665,6 +675,79 @@
   font-size: 1.4rem;
   font-weight: 700;
   color: #ddd;
+}
+
+/* ===== Game Guide ===== */
+
+.guide {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.guide-toggle {
+  width: 100%;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.guide-toggle:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.guide-content {
+  padding: 0 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guide-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+  color: #aaa;
+}
+
+.guide-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+}
+
+.guide-swatch--fort {
+  position: relative;
+}
+
+.guide-swatch--fort::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  border-radius: 2px;
+}
+
+.guide-cost {
+  margin-left: auto;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #a29bfe;
+  white-space: nowrap;
 }
 
 /* ===== Responsive: Tablet (≤768px) ===== */
