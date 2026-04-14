@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
-  signInAnonymously,
   signInWithPopup,
+  signOut,
   GoogleAuthProvider,
   onAuthStateChanged,
 } from "firebase/auth";
@@ -28,6 +28,10 @@ export function useAuth() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser && firebaseUser.isAnonymous) {
+        await signOut(auth);
+        return;
+      }
       if (firebaseUser) {
         setUser(firebaseUser);
         const userDoc = await ensureUserDocument(firebaseUser.uid);
@@ -41,16 +45,6 @@ export function useAuth() {
     return unsubscribe;
   }, []);
 
-  const loginAnonymous = async () => {
-    setLoading(true);
-    try {
-      await signInAnonymously(auth);
-    } catch (err) {
-      console.error("Anonymous sign-in failed:", err);
-      setLoading(false);
-    }
-  };
-
   const loginGoogle = async () => {
     setLoading(true);
     try {
@@ -61,7 +55,7 @@ export function useAuth() {
     }
   };
 
-  return { user, userData, setUserData, loading, loginAnonymous, loginGoogle };
+  return { user, userData, setUserData, loading, loginGoogle };
 }
 
 async function ensureUserDocument(uid) {
