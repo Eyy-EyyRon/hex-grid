@@ -86,38 +86,55 @@ function LoginScreen({ loginGoogle }) {
         <div className="absolute bottom-[-15%] right-[-5%] w-[500px] h-[500px] rounded-full bg-[#e85d04]/[0.05] blur-[120px] animate-float [animation-delay:-7s]" />
       </div>
 
-      <div className="relative w-full max-w-md">
-        <div className="absolute -inset-4 bg-gradient-to-br from-[#d00000]/[0.06] to-[#e85d04]/[0.06] rounded-3xl blur-2xl pointer-events-none" />
-        <div className="relative w-full p-8 rounded-2xl bg-[#370617]/30 border border-[#6a040f]/30 backdrop-blur-md shadow-[0_24px_80px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col items-center gap-5 animate-[modal-in_0.3s_ease-out]">
+      <div className="relative w-full max-w-lg">
+        {/* Warm glow behind card */}
+        <div className="absolute -inset-6 bg-gradient-to-br from-[#d00000]/[0.08] to-[#e85d04]/[0.08] rounded-[2rem] blur-3xl pointer-events-none" />
 
-          <span className="text-6xl leading-none text-[#ffba08] drop-shadow-[0_0_24px_rgba(255,186,8,0.5)]">{"\u2B21"}</span>
-          <h1 className="text-[2.4rem] font-black tracking-tight bg-gradient-to-r from-[#f48c06] to-[#ffba08] bg-clip-text text-transparent leading-tight drop-shadow-[0_0_15px_rgba(255,186,8,0.4)]">
+        <div className="relative w-full p-10 sm:p-12 rounded-3xl bg-gradient-to-b from-[#370617]/50 to-[#03071e]/80 border-2 border-[#6a040f]/25 backdrop-blur-xl shadow-[0_32px_100px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,186,8,0.05)] overflow-hidden flex flex-col items-center gap-6 animate-[modal-in_0.3s_ease-out]">
+
+          {/* Hex icon */}
+          <span className="text-7xl leading-none text-[#ffba08] drop-shadow-[0_0_30px_rgba(255,186,8,0.5)]">{"\u2B21"}</span>
+          <h1 className="text-[2.8rem] font-black tracking-tight bg-gradient-to-r from-[#f48c06] to-[#ffba08] bg-clip-text text-transparent leading-tight drop-shadow-[0_0_15px_rgba(255,186,8,0.4)]">
             Hex Territory
           </h1>
-          <p className="text-sm text-[#faa307]/50 -mt-2 font-medium">Capture the grid. Claim your territory.</p>
+          <p className="text-base text-[#faa307]/50 -mt-2 font-medium">Capture the grid. Claim your territory.</p>
 
-          <button
-            className="w-full flex items-center justify-center gap-3 py-3.5 rounded-lg bg-white text-[#03071e] font-bold text-[1.05rem] hover:bg-slate-100 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] active:scale-[0.97] transition-all duration-200 cursor-pointer"
-            onClick={loginGoogle}
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            Sign in with Google
-          </button>
+          {/* Google Sign-in — big, bold, gradient border */}
+          <div className="w-full mt-2 p-[2px] rounded-2xl bg-gradient-to-r from-[#e85d04] via-[#ffba08] to-[#e85d04]">
+            <button
+              className="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-[14px] bg-[#03071e] text-white font-bold text-lg hover:bg-[#0d0a1a] hover:shadow-[0_0_30px_rgba(255,186,8,0.2)] active:scale-[0.98] transition-all duration-200 cursor-pointer"
+              onClick={loginGoogle}
+            >
+              <svg className="w-6 h-6" viewBox="0 0 24 24">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              Sign in with Google
+            </button>
+          </div>
 
-          <div className="w-full mt-2 rounded-xl bg-[#03071e]/60 border border-[#6a040f]/20 p-5">
-            <h2 className="text-[0.7rem] font-bold text-[#9d0208]/60 uppercase tracking-[0.15em] text-center mb-3">How to Play</h2>
-            <ol className="flex flex-col gap-2 pl-4 list-decimal marker:text-[#e85d04]/60">
-              <li className="text-[0.82rem] text-slate-400 leading-relaxed"><strong className="text-slate-300">Claim your first tile</strong> — click any empty hex.</li>
-              <li className="text-[0.82rem] text-slate-400 leading-relaxed"><strong className="text-slate-300">Expand outward</strong> — each new tile must touch yours.</li>
-              <li className="text-[0.82rem] text-slate-400 leading-relaxed"><strong className="text-slate-300">Spend Action Points</strong> — 1 AP per tile, 5 max.</li>
-              <li className="text-[0.82rem] text-slate-400 leading-relaxed"><strong className="text-slate-300">Eliminate rivals</strong> — take all their hexes!</li>
-              <li className="text-[0.82rem] text-slate-400 leading-relaxed"><strong className="text-slate-300">Last one standing wins!</strong></li>
-            </ol>
+          {/* How to Play — chunky card */}
+          <div className="w-full mt-1 rounded-2xl bg-[#03071e]/70 border-2 border-[#6a040f]/20 p-6 sm:p-7">
+            <h2 className="text-xs font-extrabold text-[#e85d04]/70 uppercase tracking-[0.2em] text-center mb-5">How to Play</h2>
+            <div className="flex flex-col gap-4">
+              {[
+                { num: "1", title: "Claim your first tile", desc: "click any empty hex" },
+                { num: "2", title: "Expand outward", desc: "each new tile must touch yours" },
+                { num: "3", title: "Spend Action Points", desc: "1 AP per tile, 5 max" },
+                { num: "4", title: "Eliminate rivals", desc: "take all their hexes!" },
+                { num: "5", title: "Last one standing wins!", desc: "" },
+              ].map((step) => (
+                <div key={step.num} className="flex items-start gap-3.5">
+                  <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-[#e85d04]/10 border border-[#e85d04]/20 text-[#faa307] text-xs font-black shrink-0 mt-0.5">{step.num}</span>
+                  <p className="text-[0.9rem] text-slate-300 leading-relaxed">
+                    <strong className="text-white">{step.title}</strong>
+                    {step.desc && <span className="text-slate-500"> — {step.desc}</span>}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
