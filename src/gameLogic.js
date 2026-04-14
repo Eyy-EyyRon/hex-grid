@@ -59,6 +59,8 @@ export function canClaimTile(q, r, tiles, uid, ap) {
 
 export function parseTile(value) {
   if (!value || value === "empty") return { owner: null, fortified: false };
+  if (value === "gold") return { owner: null, fortified: false, gold: true };
+  if (value.endsWith("_mine")) return { owner: value.slice(0, -5), fortified: false, mined: true };
   if (value.endsWith("_fortified")) {
     return { owner: value.slice(0, -10), fortified: true };
   }
@@ -70,7 +72,18 @@ export function getTileAction(q, r, tiles, uid, ap) {
   const raw = tiles[key];
   if (raw === undefined) return null;
 
-  const { owner, fortified } = parseTile(raw);
+  const parsed = parseTile(raw);
+  const { owner, fortified } = parsed;
+
+  // Gold tile: 1 AP, adjacent (or first tile)
+  if (parsed.gold) {
+    if (ap < 1) return null;
+    const ownsAny = Object.values(tiles).some((v) => parseTile(v).owner === uid);
+    if (ownsAny) {
+      if (!getNeighborKeys(q, r).some((nk) => parseTile(tiles[nk] || "").owner === uid)) return null;
+    }
+    return { type: "claim_gold", cost: 1, newValue: uid };
+  }
 
   // Empty tile: 1 AP, must be adjacent (or first tile)
   if (!owner) {

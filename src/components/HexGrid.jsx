@@ -176,9 +176,11 @@ export default function HexGrid({ tiles, playerInfo, onHexClick, currentUid, vis
             );
           }
 
+          const rawVal = tiles ? tiles[key] : null;
           const fill = getTileFill(key, tiles, playerInfo);
-          const { owner, fortified } = parseTile(tiles ? tiles[key] : null);
+          const { owner, fortified } = parseTile(rawVal);
           const isOwn = owner === currentUid;
+          const isGold = rawVal === "gold";
 
           return (
             <g key={key} onClick={() => handleClick(q, r)}
@@ -186,8 +188,8 @@ export default function HexGrid({ tiles, playerInfo, onHexClick, currentUid, vis
                onPointerLeave={() => onHexHover?.(null)}>
               <polygon
                 points={hexCorners(x, y, HEX_SIZE - 2)}
-                className={`hex-cell${isOwn ? " hex-cell--own" : ""}`}
-                style={{ fill }}
+                className={`hex-cell${isOwn ? " hex-cell--own" : ""}${isGold ? " hex-cell--gold" : ""}`}
+                style={{ fill: isGold ? "#f1c40f" : fill }}
               />
               {fortified && (
                 <polygon

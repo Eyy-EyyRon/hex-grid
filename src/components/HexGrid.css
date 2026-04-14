@@ -50,6 +50,16 @@
   pointer-events: none;
 }
 
+.hex-cell--gold {
+  cursor: pointer;
+  animation: gold-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes gold-shimmer {
+  0%, 100% { filter: drop-shadow(0 0 3px rgba(241, 196, 15, 0.3)); }
+  50% { filter: drop-shadow(0 0 10px rgba(241, 196, 15, 0.8)); }
+}
+
 .hex-koth-ring {
   fill: none;
   stroke: #f1c40f;

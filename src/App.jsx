@@ -3,6 +3,7 @@ import { useAuth } from "./hooks/useAuth";
 import {
   useMatch, claimTile, eliminatePlayer,
   finishMatch as finishMatchFn, playAgain, kothCenterUpdate,
+  goldScoreUpdate, spawnGold,
 } from "./hooks/useMatch";
 import { useApRegen } from "./hooks/useApRegen";
 import HexGrid from "./components/HexGrid";
@@ -164,7 +165,8 @@ function getHintForTile(q, r, tiles, uid, ap) {
   const raw = tiles[key];
   if (raw === undefined) return null;
 
-  const { owner, fortified } = parseTile(raw);
+  const parsed = parseTile(raw);
+  const { owner, fortified } = parsed;
   const ownsAny = Object.values(tiles).some((v) => parseTile(v).owner === uid);
 
   if (!owner) {
@@ -178,6 +180,19 @@ function getHintForTile(q, r, tiles, uid, ap) {
     return ap >= 1
       ? { text: "Claim empty tile \u2014 1 AP", type: "action" }
       : { text: "Need 1 AP to claim", type: "warn" };
+  }
+
+  if (parsed.gold) {
+    if (!ownsAny) {
+      return ap >= 1
+        ? { text: "Grab gold \u2014 1 AP (+1 score)", type: "action" }
+        : { text: "Need 1 AP", type: "warn" };
+    }
+    const adj = getNeighborKeys(q, r).some((nk) => parseTile(tiles[nk] || "").owner === uid);
+    if (!adj) return { text: "Must be adjacent to grab gold", type: "warn" };
+    return ap >= 1
+      ? { text: "Grab gold \u2014 1 AP (+1 score)", type: "action" }
+      : { text: "Need 1 AP", type: "warn" };
   }
 
   if (owner === uid) {
@@ -261,7 +276,7 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
 
   useEffect(() => {
     if (match.status !== "playing") return;
-    if (match.gameMode === "koth" || match.gameMode === "blitz") return;
+    if (match.gameMode === "koth" || match.gameMode === "blitz" || match.gameMode === "gold_rush") return;
     const owners = new Set();
     Object.values(tiles).forEach((v) => {
       const { owner } = parseTile(v);
@@ -276,6 +291,31 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
       finishMatchFn(match.id, [...owners][0]);
     }
   }, [tiles, match.status, match.gameMode]);
+
+  /* ── Gold Rush host spawn ── */
+  const tilesRef = useRef(tiles);
+  useEffect(() => { tilesRef.current = tiles; }, [tiles]);
+
+  useEffect(() => {
+    if (match.gameMode !== "gold_rush" || !isHost || match.status !== "playing") return;
+    const id = setInterval(() => {
+      const empties = Object.entries(tilesRef.current).filter(([, v]) => v === "empty");
+      if (empties.length === 0) return;
+      const [key] = empties[Math.floor(Math.random() * empties.length)];
+      spawnGold(match.id, key);
+    }, 8000);
+    return () => clearInterval(id);
+  }, [match.gameMode, isHost, match.status, match.id]);
+
+  /* ── Gold Rush win condition ── */
+  useEffect(() => {
+    if (match.gameMode !== "gold_rush" || match.status !== "playing") return;
+    const myScore = players[user.uid]?.score || 0;
+    if (myScore >= 5 && !finishCalledRef.current) {
+      finishCalledRef.current = true;
+      finishMatchFn(match.id, user.uid);
+    }
+  }, [players, match.gameMode, match.status, user.uid, match.id]);
 
   /* ── KOTH countdown ── */
   const [kothElapsed, setKothElapsed] = useState(0);
@@ -405,8 +445,12 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
       return;
     }
     const key = `${q},${r}`;
-    const extra = (match.gameMode === "koth" && key === CENTER_HEX && action.type !== "fortify")
+    let extra = (match.gameMode === "koth" && key === CENTER_HEX && action.type !== "fortify")
       ? kothCenterUpdate(user.uid) : null;
+    if (action.type === "claim_gold") {
+      const ge = goldScoreUpdate(user.uid);
+      extra = extra ? { ...extra, ...ge } : ge;
+    }
     setUserData((prev) => ({ ...prev, ap: prev.ap - action.cost }));
     playSound("capture.wav", 0.2);
     try {
@@ -461,6 +505,14 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
         </div>
       </header>
 
+      {match.gameMode === "gold_rush" && match.status === "playing" && !isSpectator && (
+        <div className="gold-bar">
+          <span className="gold-bar-text">
+            {"\u2B50"} Gold: {players[user.uid]?.score || 0} / 5
+          </span>
+        </div>
+      )}
+
       {match.gameMode === "blitz" && match.status === "playing" && (
         <div className={`blitz-bar${blitzRemaining <= 10 ? " blitz-bar--danger" : ""}`}>
           <span className="blitz-clock">{formatCountdown(Math.ceil(blitzRemaining))}</span>
@@ -498,7 +550,7 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
           <HexGrid tiles={tiles} playerInfo={players} onHexClick={handleClaimTile} currentUid={user.uid} visibleSet={visibleSet} onHexHover={setHoveredHex} gameMode={match.gameMode} />
         </div>
         <aside className="sidebar">
-          <Leaderboard tiles={tiles} playerInfo={players} currentUid={user.uid} />
+          <Leaderboard tiles={tiles} playerInfo={players} currentUid={user.uid} gameMode={match.gameMode} />
 
           <div className="guide">
             <button className="guide-toggle" onClick={() => setGuideOpen((p) => !p)}>

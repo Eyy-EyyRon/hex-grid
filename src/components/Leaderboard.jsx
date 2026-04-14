@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { PLAYER_COLORS, parseTile } from "../gameLogic";
 import "./Leaderboard.css";
 
-export default function Leaderboard({ tiles, playerInfo, currentUid }) {
+export default function Leaderboard({ tiles, playerInfo, currentUid, gameMode }) {
   const rankings = useMemo(() => {
     if (!tiles) return [];
 
@@ -14,14 +14,19 @@ export default function Leaderboard({ tiles, playerInfo, currentUid }) {
       }
     });
 
-    return Object.entries(counts)
+    const list = Object.entries(counts)
       .map(([uid, count]) => ({
         uid,
         count,
         ...(playerInfo[uid] || {}),
-      }))
-      .sort((a, b) => b.count - a.count);
-  }, [tiles, playerInfo]);
+      }));
+    if (gameMode === "gold_rush") {
+      list.sort((a, b) => (b.score || 0) - (a.score || 0) || b.count - a.count);
+    } else {
+      list.sort((a, b) => b.count - a.count);
+    }
+    return list;
+  }, [tiles, playerInfo, gameMode]);
 
   const totalClaimed = rankings.reduce((sum, p) => sum + p.count, 0);
 
@@ -59,7 +64,9 @@ export default function Leaderboard({ tiles, playerInfo, currentUid }) {
                   {player.displayName || "Unknown"}
                   {isYou && <span className="lb-you-tag">YOU</span>}
                 </span>
-                <span className="lb-count">{player.count}</span>
+                <span className="lb-count">
+                  {gameMode === "gold_rush" ? `${player.score || 0}★ · ${player.count}` : player.count}
+                </span>
               </div>
             );
           })}

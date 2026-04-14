@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { doc, getDoc, setDoc, updateDoc, onSnapshot, writeBatch, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, onSnapshot, writeBatch, serverTimestamp, increment } from "firebase/firestore";
 import { db } from "../firebase";
 import { generateGrid, PLAYER_COLORS } from "../gameLogic";
 
@@ -39,6 +39,7 @@ export async function createMatch(user, username) {
         isAlive: true,
         displayName: username || user.displayName || "Unknown",
         photoURL: user.photoURL || "",
+        score: 0,
       },
     },
     tiles: {},
@@ -70,6 +71,7 @@ export async function joinMatch(matchId, user, username) {
       isAlive: true,
       displayName: username || user.displayName || "Unknown",
       photoURL: user.photoURL || "",
+      score: 0,
     },
   });
 }
@@ -97,6 +99,14 @@ export async function claimTile(matchId, key, uid, currentAp, newValue, cost, ex
 
 export function kothCenterUpdate(uid) {
   return { kothOwner: uid, kothClaimTime: serverTimestamp() };
+}
+
+export function goldScoreUpdate(uid) {
+  return { [`players.${uid}.score`]: increment(1) };
+}
+
+export async function spawnGold(matchId, key) {
+  await updateDoc(doc(db, "matches", matchId), { [`tiles.${key}`]: "gold" });
 }
 
 export async function setGameMode(matchId, mode) {
@@ -129,6 +139,7 @@ export async function playAgain(matchId, players) {
   };
   Object.keys(players).forEach((uid) => {
     updates[`players.${uid}.isAlive`] = true;
+    updates[`players.${uid}.score`] = 0;
   });
   await updateDoc(doc(db, "matches", matchId), updates);
 }
