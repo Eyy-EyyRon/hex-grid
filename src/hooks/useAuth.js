@@ -112,7 +112,15 @@ export function useAuth() {
     await signOut(auth);
   };
 
-  return { user, userData, setUserData, loading, loginGoogle, logout };
+  const setUsername = async (name) => {
+    if (!user) return;
+    await updateDoc(doc(db, "users", user.uid), { username: name });
+    const updated = { ...userData, username: name };
+    setUserData(updated);
+    cacheUserData(user.uid, updated);
+  };
+
+  return { user, userData, setUserData, loading, loginGoogle, logout, setUsername };
 }
 
 async function ensureUserDocument(uid, displayName, photoURL) {
@@ -155,6 +163,7 @@ async function ensureUserDocument(uid, displayName, photoURL) {
       ...data,
       ap,
       lastLoginTime,
+      username: data.username || "",
       displayName: displayName || data.displayName || "Unknown",
       photoURL: photoURL || data.photoURL || "",
     };
@@ -166,6 +175,7 @@ async function ensureUserDocument(uid, displayName, photoURL) {
     lastLoginTime: serverTimestamp(),
     displayName: displayName || "Unknown",
     photoURL: photoURL || "",
+    username: "",
   };
 
   await setDoc(userRef, newUser);

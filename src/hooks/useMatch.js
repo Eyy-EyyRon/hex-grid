@@ -27,7 +27,7 @@ export function useMatch(matchId) {
   return { match, loading };
 }
 
-export async function createMatch(user) {
+export async function createMatch(user, username) {
   const matchId = generateMatchId();
   await setDoc(doc(db, "matches", matchId), {
     status: "waiting",
@@ -37,7 +37,7 @@ export async function createMatch(user) {
       [user.uid]: {
         colorIndex: 0,
         isAlive: true,
-        displayName: user.displayName || "Unknown",
+        displayName: username || user.displayName || "Unknown",
         photoURL: user.photoURL || "",
       },
     },
@@ -50,7 +50,7 @@ export async function createMatch(user) {
   return matchId;
 }
 
-export async function joinMatch(matchId, user) {
+export async function joinMatch(matchId, user, username) {
   const ref = doc(db, "matches", matchId);
   const snap = await getDoc(ref);
   if (!snap.exists()) throw new Error("Match not found");
@@ -68,7 +68,7 @@ export async function joinMatch(matchId, user) {
     [`players.${user.uid}`]: {
       colorIndex,
       isAlive: true,
-      displayName: user.displayName || "Unknown",
+      displayName: username || user.displayName || "Unknown",
       photoURL: user.photoURL || "",
     },
   });

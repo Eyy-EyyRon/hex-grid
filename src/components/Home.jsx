@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createMatch, joinMatch } from "../hooks/useMatch";
 
-export default function Home({ user, color, onNavigate, logout }) {
+export default function Home({ user, username, color, onNavigate, logout }) {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -9,7 +9,7 @@ export default function Home({ user, color, onNavigate, logout }) {
   const handleCreate = async () => {
     setBusy(true);
     try {
-      const id = await createMatch(user);
+      const id = await createMatch(user, username);
       onNavigate("lobby", id);
     } catch (e) { setError(e.message); setBusy(false); }
   };
@@ -19,7 +19,7 @@ export default function Home({ user, color, onNavigate, logout }) {
     if (c.length !== 5) { setError("Enter a 5-character room code"); return; }
     setBusy(true); setError("");
     try {
-      await joinMatch(c, user);
+      await joinMatch(c, user, username);
       onNavigate("lobby", c);
     } catch (e) { setError(e.message); setBusy(false); }
   };
@@ -35,7 +35,7 @@ export default function Home({ user, color, onNavigate, logout }) {
           {user.photoURL && (
             <img className="avatar" src={user.photoURL} alt="" referrerPolicy="no-referrer" />
           )}
-          <span>{user.displayName || "Player"}</span>
+          <span>{username}</span>
           <span className="color-dot" style={{ backgroundColor: color }} />
         </div>
 

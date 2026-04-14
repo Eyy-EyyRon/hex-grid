@@ -10,6 +10,7 @@ import Leaderboard from "./components/Leaderboard";
 import Home from "./components/Home";
 import Lobby from "./components/Lobby";
 import { PLAYER_COLORS, MAX_AP, parseTile, getTileAction, getNeighborKeys, CENTER_HEX } from "./gameLogic";
+import { playSound } from "./audio";
 import "./App.css";
 
 /* ─── Root ─── */
@@ -17,7 +18,7 @@ import "./App.css";
 function App() {
   const {
     user, userData, setUserData, loading: authLoading,
-    loginGoogle, logout,
+    loginGoogle, logout, setUsername,
   } = useAuth();
   const [screen, setScreen] = useState("home");
   const [matchId, setMatchId] = useState(null);
@@ -31,16 +32,21 @@ function App() {
   if (authLoading) return <LoadingScreen text="Loading..." />;
   if (!user) return <LoginScreen loginGoogle={loginGoogle} />;
 
+  if (userData && !userData.username) {
+    return <UsernameModal defaultName={user.displayName || ""} onSave={setUsername} />;
+  }
+
   const color = PLAYER_COLORS[userData?.colorIndex ?? 0];
+  const username = userData?.username || user.displayName || "Player";
 
   if (screen === "home") {
-    return <Home user={user} color={color} onNavigate={navigate} logout={logout} />;
+    return <Home user={user} username={username} color={color} onNavigate={navigate} logout={logout} />;
   }
 
   if (matchLoading) return <LoadingScreen text="Connecting to match..." />;
 
   if (!match) {
-    return <Home user={user} color={color} onNavigate={navigate} logout={logout} />;
+    return <Home user={user} username={username} color={color} onNavigate={navigate} logout={logout} />;
   }
 
   if (screen === "lobby") {
@@ -99,6 +105,46 @@ function LoginScreen({ loginGoogle }) {
             <li><strong>Last one standing wins!</strong></li>
           </ol>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Username ─── */
+
+function UsernameModal({ defaultName, onSave }) {
+  const [name, setName] = useState(defaultName.slice(0, 12));
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    const trimmed = name.trim();
+    if (!trimmed || trimmed.length > 12) return;
+    setSaving(true);
+    await onSave(trimmed);
+  };
+
+  return (
+    <div className="modal-backdrop">
+      <div className="modal">
+        <div className="modal-hex-icon">{"\u2B21"}</div>
+        <h1 className="modal-title">Choose Username</h1>
+        <p className="modal-subtitle">Pick a name for the battlefield (max 12 chars)</p>
+        <input
+          className="username-input"
+          placeholder="Username"
+          maxLength={12}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSave()}
+          autoFocus
+        />
+        <button
+          className="primary-btn"
+          onClick={handleSave}
+          disabled={saving || !name.trim()}
+        >
+          {saving ? "Saving..." : "Continue"}
+        </button>
       </div>
     </div>
   );
@@ -265,6 +311,15 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
   const kothOwnerColor = kothOwnerInfo ? PLAYER_COLORS[kothOwnerInfo.colorIndex ?? 0] : "#f1c40f";
   const kothOwnerName = kothOwnerInfo?.displayName || "Unknown";
 
+  const prevKothOwnerRef = useRef(match.kothOwner);
+  useEffect(() => {
+    if (match.gameMode !== "koth" || match.status !== "playing") return;
+    if (match.kothOwner && match.kothOwner !== prevKothOwnerRef.current) {
+      playSound("alarm.wav", 0.4);
+    }
+    prevKothOwnerRef.current = match.kothOwner;
+  }, [match.kothOwner, match.gameMode, match.status]);
+
   /* ── Blitz countdown ── */
   const BLITZ_DURATION = 120;
   const [blitzRemaining, setBlitzRemaining] = useState(BLITZ_DURATION);
@@ -289,6 +344,18 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
   }, [match.startTime, match.status, match.gameMode]);
 
   const blitzFrozen = match.gameMode === "blitz" && blitzRemaining <= 0 && match.status === "playing";
+
+  const blitzAlarmRef = useRef(0);
+  useEffect(() => {
+    if (match.gameMode !== "blitz" || match.status !== "playing") return;
+    if (blitzRemaining <= 10 && blitzRemaining > 0) {
+      const sec = Math.ceil(blitzRemaining);
+      if (sec !== blitzAlarmRef.current) {
+        blitzAlarmRef.current = sec;
+        playSound("alarm.wav", 0.3);
+      }
+    }
+  }, [blitzRemaining, match.gameMode, match.status]);
 
   useEffect(() => {
     if (!blitzFrozen || !isHost || blitzFinishRef.current) return;
@@ -334,12 +401,14 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
     if (!action) {
       setApShake(true);
       setTimeout(() => setApShake(false), 400);
+      playSound("error.wav", 0.25);
       return;
     }
     const key = `${q},${r}`;
     const extra = (match.gameMode === "koth" && key === CENTER_HEX && action.type !== "fortify")
       ? kothCenterUpdate(user.uid) : null;
     setUserData((prev) => ({ ...prev, ap: prev.ap - action.cost }));
+    playSound("capture.wav", 0.2);
     try {
       await claimTile(match.id, key, user.uid, ap, action.newValue, action.cost, extra);
     } catch (err) {
