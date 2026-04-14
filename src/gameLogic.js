@@ -1,6 +1,7 @@
 export const GRID_SIZE = 9;
 export const MAX_AP = 5;
 export const AP_REGEN_MS = 5 * 60 * 1000; // 5 minutes per AP
+export const CENTER_HEX = "0,0";
 
 export const PLAYER_COLORS = [
   "#e74c3c",

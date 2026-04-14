@@ -2,14 +2,14 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useAuth } from "./hooks/useAuth";
 import {
   useMatch, claimTile, eliminatePlayer,
-  finishMatch as finishMatchFn, playAgain,
+  finishMatch as finishMatchFn, playAgain, kothCenterUpdate,
 } from "./hooks/useMatch";
 import { useApRegen } from "./hooks/useApRegen";
 import HexGrid from "./components/HexGrid";
 import Leaderboard from "./components/Leaderboard";
 import Home from "./components/Home";
 import Lobby from "./components/Lobby";
-import { PLAYER_COLORS, MAX_AP, parseTile, getTileAction, getNeighborKeys } from "./gameLogic";
+import { PLAYER_COLORS, MAX_AP, parseTile, getTileAction, getNeighborKeys, CENTER_HEX } from "./gameLogic";
 import "./App.css";
 
 /* ─── Root ─── */
@@ -193,8 +193,9 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
         getNeighborKeys(q, r).forEach((nk) => visible.add(nk));
       }
     });
+    if (match.gameMode === "koth") visible.add(CENTER_HEX);
     return visible;
-  }, [tiles, user.uid, isSpectator, match.status]);
+  }, [tiles, user.uid, isSpectator, match.status, match.gameMode]);
 
   useEffect(() => {
     if (match.status !== "playing" || !myPlayer?.isAlive) return;
@@ -203,7 +204,7 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
     }
   }, [hadTiles, myTileCount, match.status, myPlayer?.isAlive]);
 
-  /* ── Win condition ── */
+  /* ── Win condition (domination / capital) ── */
   const matchPlayersRef = useRef(new Set());
   const finishCalledRef = useRef(false);
 
@@ -214,6 +215,7 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
 
   useEffect(() => {
     if (match.status !== "playing") return;
+    if (match.gameMode === "koth" || match.gameMode === "blitz") return;
     const owners = new Set();
     Object.values(tiles).forEach((v) => {
       const { owner } = parseTile(v);
@@ -227,7 +229,41 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
       finishCalledRef.current = true;
       finishMatchFn(match.id, [...owners][0]);
     }
-  }, [tiles, match.status]);
+  }, [tiles, match.status, match.gameMode]);
+
+  /* ── KOTH countdown ── */
+  const [kothElapsed, setKothElapsed] = useState(0);
+  const kothFinishRef = useRef(false);
+
+  useEffect(() => { kothFinishRef.current = false; }, [match.status]);
+
+  useEffect(() => {
+    if (match.gameMode !== "koth" || !match.kothOwner || match.status !== "playing") {
+      setKothElapsed(0);
+      return;
+    }
+    const ct = match.kothClaimTime;
+    if (!ct) { setKothElapsed(0); return; }
+    const claimMs = ct.toDate ? ct.toDate().getTime() : ct.seconds ? ct.seconds * 1000 : null;
+    if (!claimMs) { setKothElapsed(0); return; }
+
+    const tick = () => setKothElapsed(Math.min(Math.max((Date.now() - claimMs) / 1000, 0), 30));
+    tick();
+    const id = setInterval(tick, 100);
+    return () => clearInterval(id);
+  }, [match.kothOwner, match.kothClaimTime, match.status, match.gameMode]);
+
+  useEffect(() => {
+    if (match.gameMode !== "koth" || match.status !== "playing") return;
+    if (kothElapsed >= 30 && match.kothOwner === user.uid && !kothFinishRef.current) {
+      kothFinishRef.current = true;
+      finishMatchFn(match.id, match.kothOwner);
+    }
+  }, [kothElapsed, match.kothOwner, user.uid, match.status, match.gameMode]);
+
+  const kothOwnerInfo = match.kothOwner ? players[match.kothOwner] : null;
+  const kothOwnerColor = kothOwnerInfo ? PLAYER_COLORS[kothOwnerInfo.colorIndex ?? 0] : "#f1c40f";
+  const kothOwnerName = kothOwnerInfo?.displayName || "Unknown";
 
   /* ── Status message ── */
   const statusMessage = useMemo(() => {
@@ -260,9 +296,11 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
       return;
     }
     const key = `${q},${r}`;
+    const extra = (match.gameMode === "koth" && key === CENTER_HEX && action.type !== "fortify")
+      ? kothCenterUpdate(user.uid) : null;
     setUserData((prev) => ({ ...prev, ap: prev.ap - action.cost }));
     try {
-      await claimTile(match.id, key, user.uid, ap, action.newValue, action.cost);
+      await claimTile(match.id, key, user.uid, ap, action.newValue, action.cost, extra);
     } catch (err) {
       console.error("Claim failed:", err);
       setUserData((prev) => ({ ...prev, ap: prev.ap + action.cost }));
@@ -313,6 +351,19 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
         </div>
       </header>
 
+      {match.gameMode === "koth" && match.kothOwner && match.status === "playing" && (
+        <div className="koth-bar">
+          <div
+            className="koth-bar-fill"
+            style={{ width: `${(kothElapsed / 30) * 100}%`, backgroundColor: kothOwnerColor }}
+          />
+          <span className="koth-bar-text">
+            {match.kothOwner === user.uid ? "You hold" : `${kothOwnerName} holds`} the Hill
+            &nbsp;&mdash;&nbsp;{Math.ceil(30 - kothElapsed)}s
+          </span>
+        </div>
+      )}
+
       {!isSpectator && (hint || statusMessage) && (
         <p className={`status-msg${
           hint
@@ -327,7 +378,7 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
 
       <main className="main-content">
         <div className="grid-panel">
-          <HexGrid tiles={tiles} playerInfo={players} onHexClick={handleClaimTile} currentUid={user.uid} visibleSet={visibleSet} onHexHover={setHoveredHex} />
+          <HexGrid tiles={tiles} playerInfo={players} onHexClick={handleClaimTile} currentUid={user.uid} visibleSet={visibleSet} onHexHover={setHoveredHex} gameMode={match.gameMode} />
         </div>
         <aside className="sidebar">
           <Leaderboard tiles={tiles} playerInfo={players} currentUid={user.uid} />

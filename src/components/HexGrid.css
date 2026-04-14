@@ -50,6 +50,19 @@
   pointer-events: none;
 }
 
+.hex-koth-ring {
+  fill: none;
+  stroke: #f1c40f;
+  stroke-width: 3;
+  pointer-events: none;
+  animation: koth-glow 2s ease-in-out infinite;
+}
+
+@keyframes koth-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(241, 196, 15, 0.4)); }
+  50% { filter: drop-shadow(0 0 12px rgba(241, 196, 15, 0.9)); }
+}
+
 @media (max-width: 480px) {
   .hex-grid-wrapper {
     max-width: 100%;

@@ -31,7 +31,7 @@ function getTileFill(key, tiles, playerInfo) {
   return info ? PLAYER_COLORS[info.colorIndex] : "#555";
 }
 
-export default function HexGrid({ tiles, playerInfo, onHexClick, currentUid, visibleSet, onHexHover }) {
+export default function HexGrid({ tiles, playerInfo, onHexClick, currentUid, visibleSet, onHexHover, gameMode }) {
   const cells = useMemo(() => generateGrid(), []);
   const svgRef = useRef(null);
   const gestureRef = useRef({ panning: false, sx: 0, sy: 0, moved: false });
@@ -194,6 +194,12 @@ export default function HexGrid({ tiles, playerInfo, onHexClick, currentUid, vis
                   points={hexCorners(x, y, FORT_SIZE)}
                   className="hex-fort"
                   style={{ stroke: isOwn ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.3)" }}
+                />
+              )}
+              {gameMode === "koth" && q === 0 && r === 0 && (
+                <polygon
+                  points={hexCorners(x, y, HEX_SIZE)}
+                  className="hex-koth-ring"
                 />
               )}
             </g>

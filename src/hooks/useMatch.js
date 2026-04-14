@@ -18,7 +18,7 @@ export function useMatch(matchId) {
     if (!matchId) { setMatch(null); setLoading(false); return; }
     setLoading(true);
     const unsub = onSnapshot(doc(db, "matches", matchId), (snap) => {
-      setMatch(snap.exists() ? { id: snap.id, ...snap.data() } : null);
+      setMatch(snap.exists() ? { id: snap.id, ...snap.data({ serverTimestamps: 'estimate' }) } : null);
       setLoading(false);
     });
     return unsub;
@@ -86,11 +86,17 @@ export async function startGame(matchId) {
   });
 }
 
-export async function claimTile(matchId, key, uid, currentAp, newValue, cost) {
+export async function claimTile(matchId, key, uid, currentAp, newValue, cost, extraMatchUpdates = null) {
   const batch = writeBatch(db);
-  batch.update(doc(db, "matches", matchId), { [`tiles.${key}`]: newValue });
+  const matchUpd = { [`tiles.${key}`]: newValue };
+  if (extraMatchUpdates) Object.assign(matchUpd, extraMatchUpdates);
+  batch.update(doc(db, "matches", matchId), matchUpd);
   batch.update(doc(db, "users", uid), { ap: currentAp - cost });
   await batch.commit();
+}
+
+export function kothCenterUpdate(uid) {
+  return { kothOwner: uid, kothClaimTime: serverTimestamp() };
 }
 
 export async function setGameMode(matchId, mode) {
