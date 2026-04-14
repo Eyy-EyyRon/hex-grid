@@ -3,7 +3,8 @@ import { useAuth } from "./hooks/useAuth";
 import { useMap } from "./hooks/useMap";
 import HexGrid from "./components/HexGrid";
 import Leaderboard from "./components/Leaderboard";
-import { PLAYER_COLORS, canClaimTile } from "./gameLogic";
+import { PLAYER_COLORS, MAX_AP, canClaimTile } from "./gameLogic";
+import { useApRegen } from "./hooks/useApRegen";
 import { db } from "./firebase";
 import { doc, writeBatch } from "firebase/firestore";
 import "./App.css";
@@ -77,16 +78,27 @@ function App() {
   );
 }
 
+function formatCountdown(seconds) {
+  if (seconds == null) return null;
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
 function GameView({
   user, userData, setUserData, tiles, setTiles,
   playerInfo, ap, color, logout,
 }) {
+  const countdown = useApRegen(user, userData, setUserData);
+  const countdownStr = formatCountdown(countdown);
+
   const statusMessage = useMemo(() => {
     if (!tiles) return "";
     const ownsAny = Object.values(tiles).some((v) => v === user.uid);
     if (!ownsAny) return "Click any hex to claim your starting territory!";
-    if (ap === 0) return "Out of AP! Come back later to regenerate.";
-    return "Click an adjacent hex to expand your territory.";
+    if (ap === 0) return "Out of AP! Next AP regenerates soon.";
+    if (ap < MAX_AP) return "Click an adjacent hex to expand your territory.";
+    return "Full AP! Expand your territory.";
   }, [tiles, user.uid, ap]);
 
   const handleClaimTile = async (q, r) => {
@@ -129,6 +141,9 @@ function GameView({
               />
             ))}
             <span className="ap-label">{ap} AP</span>
+            {countdownStr && (
+              <span className="ap-timer">+1 in {countdownStr}</span>
+            )}
           </div>
         </div>
 

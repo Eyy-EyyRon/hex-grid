@@ -7,6 +7,7 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
+import { MAX_AP, AP_REGEN_MS } from "../gameLogic";
 
 const PLAYER_COLORS = [
   "#e74c3c",
@@ -72,14 +73,40 @@ async function ensureUserDocument(uid, displayName, photoURL) {
 
   if (snap.exists()) {
     const data = snap.data();
+    const updates = {};
+
     if (data.displayName !== displayName || data.photoURL !== photoURL) {
-      await updateDoc(userRef, {
-        displayName: displayName || "Unknown",
-        photoURL: photoURL || "",
-      });
+      updates.displayName = displayName || "Unknown";
+      updates.photoURL = photoURL || "";
     }
+
+    // Calculate offline AP regen
+    let ap = data.ap;
+    let lastLoginTime = data.lastLoginTime;
+
+    if (ap < MAX_AP && lastLoginTime) {
+      const lastTime = lastLoginTime.toDate
+        ? lastLoginTime.toDate()
+        : new Date(lastLoginTime);
+      const elapsed = Date.now() - lastTime.getTime();
+      const earned = Math.floor(elapsed / AP_REGEN_MS);
+
+      if (earned > 0) {
+        ap = Math.min(ap + earned, MAX_AP);
+        lastLoginTime = new Date(lastTime.getTime() + earned * AP_REGEN_MS);
+        updates.ap = ap;
+        updates.lastLoginTime = lastLoginTime;
+      }
+    }
+
+    if (Object.keys(updates).length > 0) {
+      await updateDoc(userRef, updates);
+    }
+
     return {
       ...data,
+      ap,
+      lastLoginTime,
       displayName: displayName || data.displayName || "Unknown",
       photoURL: photoURL || data.photoURL || "",
     };
@@ -87,7 +114,7 @@ async function ensureUserDocument(uid, displayName, photoURL) {
 
   const newUser = {
     colorIndex: Math.floor(Math.random() * PLAYER_COLORS.length),
-    ap: 5,
+    ap: MAX_AP,
     lastLoginTime: serverTimestamp(),
     displayName: displayName || "Unknown",
     photoURL: photoURL || "",

@@ -318,6 +318,17 @@
   color: #a29bfe;
 }
 
+.ap-timer {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #f39c12;
+  margin-left: 8px;
+  background: rgba(243, 156, 18, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ===== Responsive ===== */
 
 @media (max-width: 768px) {
