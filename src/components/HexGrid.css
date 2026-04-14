@@ -1,7 +1,7 @@
 .hex-grid-wrapper {
   width: 100%;
   max-width: 620px;
-  margin: 12px auto 0;
+  margin: 16px auto 0;
   display: flex;
   justify-content: center;
   overflow: hidden;
@@ -13,6 +13,7 @@
   width: 100%;
   height: auto;
   cursor: grab;
+  filter: drop-shadow(0 0 30px rgba(124, 58, 237, 0.1));
 }
 
 .hex-grid-svg:active {
@@ -20,28 +21,30 @@
 }
 
 .hex-cell {
-  stroke: #370617;
+  stroke: #2d1b47;
   stroke-width: 1.5;
   cursor: pointer;
-  transition: fill 0.3s ease, stroke 0.15s, filter 0.15s;
+  transition: fill 0.3s ease, stroke 0.2s, filter 0.2s;
 }
 
 .hex-cell:hover {
-  filter: brightness(1.35);
-  stroke: rgba(232, 93, 4, 0.55);
+  filter: brightness(1.4);
+  stroke: rgba(167, 139, 250, 0.7);
+  stroke-width: 2;
 }
 
 .hex-cell--own {
-  stroke: rgba(255, 186, 8, 0.6);
-  stroke-width: 2;
-  filter: drop-shadow(0 0 4px rgba(255, 186, 8, 0.3));
+  stroke: rgba(196, 181, 253, 0.8);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 6px rgba(124, 58, 237, 0.5));
 }
 
 .hex-cell--fog {
-  stroke: #0a0510;
+  stroke: #0a0e27;
   stroke-width: 1;
   cursor: default;
   pointer-events: none;
+  opacity: 0.4;
 }
 
 .hex-fort {
@@ -52,31 +55,31 @@
 
 .hex-cell--gold {
   cursor: pointer;
-  animation: gold-shimmer 1.5s ease-in-out infinite;
+  animation: gold-shimmer 1.8s ease-in-out infinite;
 }
 
 @keyframes gold-shimmer {
-  0%, 100% { filter: drop-shadow(0 0 3px rgba(241, 196, 15, 0.3)); }
-  50% { filter: drop-shadow(0 0 10px rgba(241, 196, 15, 0.8)); }
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(250, 204, 21, 0.4)); }
+  50% { filter: drop-shadow(0 0 14px rgba(250, 204, 21, 0.9)); }
 }
 
 .hex-koth-ring {
   fill: none;
-  stroke: #f1c40f;
-  stroke-width: 3;
+  stroke: #fbbf24;
+  stroke-width: 3.5;
   pointer-events: none;
-  animation: koth-glow 2s ease-in-out infinite;
+  animation: koth-glow 2.2s ease-in-out infinite;
 }
 
 @keyframes koth-glow {
-  0%, 100% { filter: drop-shadow(0 0 4px rgba(241, 196, 15, 0.4)); }
-  50% { filter: drop-shadow(0 0 12px rgba(241, 196, 15, 0.9)); }
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.5)); }
+  50% { filter: drop-shadow(0 0 16px rgba(250, 204, 21, 1)); }
 }
 
 @media (max-width: 480px) {
   .hex-grid-wrapper {
     max-width: 100%;
-    margin: 4px auto 0;
+    margin: 8px auto 0;
   }
 }
 

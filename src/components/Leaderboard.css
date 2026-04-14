@@ -1,140 +1,149 @@
 .leaderboard {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 14px;
-  padding: 18px 16px;
+  background: rgba(124, 58, 237, 0.08);
+  border: 1.5px solid rgba(124, 58, 237, 0.15);
+  border-radius: 16px;
+  padding: 22px 20px;
   width: 100%;
+  box-shadow: 0 0 40px rgba(124, 58, 237, 0.05),
+              inset 0 1px 15px rgba(124, 58, 237, 0.05);
 }
 
 .lb-title {
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  margin: 0 0 14px;
+  margin: 0 0 16px;
   text-align: center;
-  color: #ccc;
+  color: #d1d5db;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  font-size: 0.8rem;
+  letter-spacing: 1.2px;
 }
 
 .lb-empty {
   text-align: center;
-  font-size: 0.85rem;
-  opacity: 0.4;
+  font-size: 0.9rem;
+  color: #9ca3af;
 }
 
 .lb-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .lb-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.02);
-  transition: background 0.15s;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 1px solid rgba(124, 58, 237, 0.08);
 }
 
 .lb-row:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.15);
 }
 
 .lb-row--you {
-  background: rgba(108, 92, 231, 0.12);
-  border: 1px solid rgba(108, 92, 231, 0.25);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(167, 139, 250, 0.06) 100%);
+  border: 1.5px solid rgba(124, 58, 237, 0.25);
 }
 
 .lb-rank {
   font-size: 0.8rem;
   font-weight: 700;
-  color: #888;
-  min-width: 26px;
+  color: #9ca3af;
+  min-width: 28px;
+  text-align: center;
 }
 
 .lb-avatar {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  border: 2px solid rgba(124, 58, 237, 0.2);
 }
 
 .lb-swatch {
   display: inline-block;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   flex-shrink: 0;
-  border: 2px solid rgba(255, 255, 255, 0.15);
+  border: 2.5px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.15);
 }
 
 .lb-name {
   flex: 1;
-  font-size: 0.88rem;
+  font-size: 0.92rem;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #ddd;
+  color: #e5e7eb;
 }
 
 .lb-you-tag {
   display: inline-block;
-  margin-left: 6px;
+  margin-left: 8px;
   font-size: 0.65rem;
   font-weight: 700;
-  color: #a29bfe;
-  background: rgba(108, 92, 231, 0.2);
-  padding: 1px 6px;
-  border-radius: 4px;
+  color: #c4b5fd;
+  background: rgba(124, 58, 237, 0.25);
+  padding: 2px 8px;
+  border-radius: 5px;
   vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .lb-count {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 800;
-  color: #fff;
-  min-width: 24px;
+  color: #f5f3ff;
+  min-width: 30px;
   text-align: right;
 }
 
 .lb-total {
-  margin-top: 12px;
+  margin-top: 14px;
   text-align: center;
-  font-size: 0.78rem;
-  color: #666;
+  font-size: 0.8rem;
+  color: #6b7280;
 }
 
 @media (max-width: 480px) {
   .leaderboard {
-    padding: 14px 12px;
-    border-radius: 12px;
+    padding: 16px 14px;
+    border-radius: 14px;
   }
 
   .lb-row {
-    padding: 6px 8px;
-    gap: 8px;
+    padding: 8px 10px;
+    gap: 10px;
   }
 
   .lb-avatar,
   .lb-swatch {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
   }
 
   .lb-name {
-    font-size: 0.82rem;
+    font-size: 0.86rem;
   }
 
   .lb-count {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
 
   .lb-total {
-    margin-top: 8px;
-    font-size: 0.72rem;
+    margin-top: 10px;
+    font-size: 0.76rem;
   }
 }
