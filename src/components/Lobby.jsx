@@ -1,10 +1,18 @@
 import { useEffect } from "react";
 import { PLAYER_COLORS } from "../gameLogic";
-import { startGame } from "../hooks/useMatch";
+import { startGame, setGameMode } from "../hooks/useMatch";
+
+const MODES = [
+  { key: "domination", label: "Domination", desc: "Capture every tile to win" },
+  { key: "capital", label: "Capital", desc: "Destroy enemy capitals to win" },
+  { key: "koth", label: "King of the Hill", desc: "Hold the center for 30s" },
+  { key: "blitz", label: "Blitz", desc: "Most tiles in 2 minutes wins" },
+];
 
 export default function Lobby({ match, user, onNavigate }) {
   const isHost = user.uid === match?.hostId;
   const players = match?.players || {};
+  const gameMode = match?.gameMode || "domination";
 
   useEffect(() => {
     if (match?.status === "playing") onNavigate("game", match.id);
@@ -21,6 +29,23 @@ export default function Lobby({ match, user, onNavigate }) {
           <span className="room-code-label">ROOM CODE</span>
           <span className="room-code">{match.id}</span>
           <span className="room-code-hint">tap to copy</span>
+        </div>
+
+        <div className="mode-picker">
+          <span className="mode-picker-label">Game Mode</span>
+          <div className="mode-options">
+            {MODES.map((m) => (
+              <button
+                key={m.key}
+                className={`mode-btn${gameMode === m.key ? " mode-btn--active" : ""}`}
+                disabled={!isHost}
+                onClick={() => isHost && setGameMode(match.id, m.key)}
+              >
+                <span className="mode-btn-name">{m.label}</span>
+                <span className="mode-btn-desc">{m.desc}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="player-list">

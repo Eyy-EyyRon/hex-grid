@@ -588,6 +588,71 @@
   text-align: center;
 }
 
+/* ===== Mode picker ===== */
+
+.mode-picker {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mode-picker-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.mode-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mode-btn {
+  flex: 1 1 calc(50% - 4px);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 10px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  color: #999;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.mode-btn:hover:not(:disabled) {
+  border-color: rgba(108, 92, 231, 0.3);
+  background: rgba(108, 92, 231, 0.06);
+}
+
+.mode-btn--active {
+  border-color: #6c5ce7;
+  background: rgba(108, 92, 231, 0.12);
+  color: #ddd;
+}
+
+.mode-btn:disabled {
+  cursor: default;
+}
+
+.mode-btn-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.mode-btn-desc {
+  font-size: 0.7rem;
+  opacity: 0.6;
+  line-height: 1.3;
+}
+
 /* ===== Header code badge ===== */
 
 .header-code {

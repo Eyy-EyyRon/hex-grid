@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { doc, getDoc, setDoc, updateDoc, onSnapshot, writeBatch } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, onSnapshot, writeBatch, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 import { generateGrid, PLAYER_COLORS } from "../gameLogic";
 
@@ -32,6 +32,7 @@ export async function createMatch(user) {
   await setDoc(doc(db, "matches", matchId), {
     status: "waiting",
     hostId: user.uid,
+    gameMode: "domination",
     players: {
       [user.uid]: {
         colorIndex: 0,
@@ -42,6 +43,9 @@ export async function createMatch(user) {
     },
     tiles: {},
     winnerId: null,
+    startTime: null,
+    kothOwner: null,
+    kothClaimTime: null,
   });
   return matchId;
 }
@@ -73,7 +77,13 @@ export async function joinMatch(matchId, user) {
 export async function startGame(matchId) {
   const tiles = {};
   generateGrid().forEach(({ q, r }) => { tiles[`${q},${r}`] = "empty"; });
-  await updateDoc(doc(db, "matches", matchId), { status: "playing", tiles });
+  await updateDoc(doc(db, "matches", matchId), {
+    status: "playing",
+    tiles,
+    startTime: serverTimestamp(),
+    kothOwner: null,
+    kothClaimTime: null,
+  });
 }
 
 export async function claimTile(matchId, key, uid, currentAp, newValue, cost) {
@@ -81,6 +91,10 @@ export async function claimTile(matchId, key, uid, currentAp, newValue, cost) {
   batch.update(doc(db, "matches", matchId), { [`tiles.${key}`]: newValue });
   batch.update(doc(db, "users", uid), { ap: currentAp - cost });
   await batch.commit();
+}
+
+export async function setGameMode(matchId, mode) {
+  await updateDoc(doc(db, "matches", matchId), { gameMode: mode });
 }
 
 export async function eliminatePlayer(matchId, uid) {
@@ -99,7 +113,14 @@ export async function finishMatch(matchId, winnerId) {
 export async function playAgain(matchId, players) {
   const tiles = {};
   generateGrid().forEach(({ q, r }) => { tiles[`${q},${r}`] = "empty"; });
-  const updates = { status: "playing", tiles, winnerId: null };
+  const updates = {
+    status: "playing",
+    tiles,
+    winnerId: null,
+    startTime: serverTimestamp(),
+    kothOwner: null,
+    kothClaimTime: null,
+  };
   Object.keys(players).forEach((uid) => {
     updates[`players.${uid}.isAlive`] = true;
   });
