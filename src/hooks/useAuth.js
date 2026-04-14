@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { signInAnonymously, onAuthStateChanged } from "firebase/auth";
+import {
+  signInAnonymously,
+  signInWithPopup,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+} from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
 
@@ -13,6 +18,8 @@ const PLAYER_COLORS = [
   "#1abc9c",
   "#e84393",
 ];
+
+const googleProvider = new GoogleAuthProvider();
 
 export function useAuth() {
   const [user, setUser] = useState(null);
@@ -34,7 +41,7 @@ export function useAuth() {
     return unsubscribe;
   }, []);
 
-  const login = async () => {
+  const loginAnonymous = async () => {
     setLoading(true);
     try {
       await signInAnonymously(auth);
@@ -44,7 +51,17 @@ export function useAuth() {
     }
   };
 
-  return { user, userData, setUserData, loading, login };
+  const loginGoogle = async () => {
+    setLoading(true);
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (err) {
+      console.error("Google sign-in failed:", err);
+      setLoading(false);
+    }
+  };
+
+  return { user, userData, setUserData, loading, loginAnonymous, loginGoogle };
 }
 
 async function ensureUserDocument(uid) {

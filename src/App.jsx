@@ -7,7 +7,10 @@ import { doc, writeBatch, updateDoc, serverTimestamp } from "firebase/firestore"
 import "./App.css";
 
 function App() {
-  const { user, userData, setUserData, loading: authLoading, login } = useAuth();
+  const {
+    user, userData, setUserData, loading: authLoading,
+    loginAnonymous, loginGoogle,
+  } = useAuth();
   const { tiles, setTiles, uidColorMap, loading: mapLoading } = useMap();
 
   const loading = authLoading || mapLoading;
@@ -25,9 +28,26 @@ function App() {
       <div className="screen screen--center">
         <h1 className="title">Hex Territory</h1>
         <p className="subtitle">Capture the grid. Claim your territory.</p>
-        <button className="play-btn" onClick={login}>
-          Play Now
-        </button>
+
+        <div className="login-buttons">
+          <button className="play-btn" onClick={loginGoogle}>
+            Sign in with Google
+          </button>
+          <button className="play-btn play-btn--ghost" onClick={loginAnonymous}>
+            Play as Guest
+          </button>
+        </div>
+
+        <div className="how-to-play">
+          <h2>How to Play</h2>
+          <ol>
+            <li><strong>Claim your first tile</strong> — click any empty hex on the grid to place your starting territory.</li>
+            <li><strong>Expand outward</strong> — each new tile must be adjacent to one you already own.</li>
+            <li><strong>Spend Action Points (AP)</strong> — every tile costs 1 AP. You start with 5.</li>
+            <li><strong>Wait and recover</strong> — once you run out, come back later. Your AP regenerates over time.</li>
+            <li><strong>Dominate the map</strong> — the player who controls the most hexes wins!</li>
+          </ol>
+        </div>
       </div>
     );
   }
@@ -86,7 +106,7 @@ function App() {
         <div className="user-info">
           <span className="color-swatch" style={{ backgroundColor: color }} />
           <span>
-            Player: <strong>{user.uid.slice(0, 8)}...</strong>
+            <strong>{user.displayName || `Guest ${user.uid.slice(0, 6)}`}</strong>
           </span>
         </div>
 
