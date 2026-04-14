@@ -265,6 +265,47 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
   const kothOwnerColor = kothOwnerInfo ? PLAYER_COLORS[kothOwnerInfo.colorIndex ?? 0] : "#f1c40f";
   const kothOwnerName = kothOwnerInfo?.displayName || "Unknown";
 
+  /* ── Blitz countdown ── */
+  const BLITZ_DURATION = 120;
+  const [blitzRemaining, setBlitzRemaining] = useState(BLITZ_DURATION);
+  const blitzFinishRef = useRef(false);
+
+  useEffect(() => { blitzFinishRef.current = false; }, [match.status]);
+
+  useEffect(() => {
+    if (match.gameMode !== "blitz" || match.status !== "playing") {
+      setBlitzRemaining(BLITZ_DURATION);
+      return;
+    }
+    const st = match.startTime;
+    if (!st) return;
+    const startMs = st.toDate ? st.toDate().getTime() : st.seconds ? st.seconds * 1000 : null;
+    if (!startMs) return;
+
+    const tick = () => setBlitzRemaining(Math.max(BLITZ_DURATION - (Date.now() - startMs) / 1000, 0));
+    tick();
+    const id = setInterval(tick, 100);
+    return () => clearInterval(id);
+  }, [match.startTime, match.status, match.gameMode]);
+
+  const blitzFrozen = match.gameMode === "blitz" && blitzRemaining <= 0 && match.status === "playing";
+
+  useEffect(() => {
+    if (!blitzFrozen || !isHost || blitzFinishRef.current) return;
+    blitzFinishRef.current = true;
+    const counts = {};
+    Object.values(tiles).forEach((v) => {
+      const { owner } = parseTile(v);
+      if (owner) counts[owner] = (counts[owner] || 0) + 1;
+    });
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    if (sorted.length === 0) return;
+    const maxCount = sorted[0][1];
+    const tied = sorted.filter(([, c]) => c === maxCount);
+    const winner = tied[Math.floor(Math.random() * tied.length)][0];
+    finishMatchFn(match.id, winner);
+  }, [blitzFrozen, isHost, tiles]);
+
   /* ── Status message ── */
   const statusMessage = useMemo(() => {
     if (isSpectator || match.status !== "playing") return "";
@@ -288,7 +329,7 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
   const [apShake, setApShake] = useState(false);
 
   const handleClaimTile = async (q, r) => {
-    if (isSpectator || match.status !== "playing") return;
+    if (isSpectator || match.status !== "playing" || blitzFrozen) return;
     const action = getTileAction(q, r, tiles, user.uid, ap);
     if (!action) {
       setApShake(true);
@@ -350,6 +391,13 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
           <button className="sign-out-btn" onClick={() => onNavigate("home")}>Leave</button>
         </div>
       </header>
+
+      {match.gameMode === "blitz" && match.status === "playing" && (
+        <div className={`blitz-bar${blitzRemaining <= 10 ? " blitz-bar--danger" : ""}`}>
+          <span className="blitz-clock">{formatCountdown(Math.ceil(blitzRemaining))}</span>
+          <span className="blitz-label">BLITZ</span>
+        </div>
+      )}
 
       {match.gameMode === "koth" && match.kothOwner && match.status === "playing" && (
         <div className="koth-bar">
