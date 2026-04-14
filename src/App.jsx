@@ -1,4 +1,5 @@
 import { useAuth } from "./hooks/useAuth";
+import HexGrid from "./components/HexGrid";
 import "./App.css";
 
 const PLAYER_COLORS = [
@@ -17,7 +18,7 @@ function App() {
 
   if (loading) {
     return (
-      <div className="screen">
+      <div className="screen screen--center">
         <p className="loading-text">Loading...</p>
       </div>
     );
@@ -25,7 +26,7 @@ function App() {
 
   if (!user) {
     return (
-      <div className="screen">
+      <div className="screen screen--center">
         <h1 className="title">Hex Territory</h1>
         <p className="subtitle">Capture the grid. Claim your territory.</p>
         <button className="play-btn" onClick={login}>
@@ -50,7 +51,7 @@ function App() {
         </span>
         <span className="ap-badge">AP: {userData?.ap ?? 0}</span>
       </div>
-      <p className="placeholder">Grid coming in Step 2...</p>
+      <HexGrid />
     </div>
   );
 }

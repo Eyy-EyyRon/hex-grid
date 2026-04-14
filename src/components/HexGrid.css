@@ -1,0 +1,24 @@
+.hex-grid-wrapper {
+  width: 100%;
+  max-width: 620px;
+  margin: 12px auto 0;
+  display: flex;
+  justify-content: center;
+}
+
+.hex-grid-svg {
+  width: 100%;
+  height: auto;
+}
+
+.hex-cell {
+  fill: #2d2d44;
+  stroke: #444466;
+  stroke-width: 1.5;
+  cursor: pointer;
+  transition: fill 0.15s;
+}
+
+.hex-cell:hover {
+  fill: #3e3e5e;
+}
