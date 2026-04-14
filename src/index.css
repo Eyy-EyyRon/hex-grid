@@ -2,6 +2,11 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  overscroll-behavior: none;
 }
 
 body {
@@ -9,6 +14,7 @@ body {
   background: #12121f;
   color: #e0e0e0;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 

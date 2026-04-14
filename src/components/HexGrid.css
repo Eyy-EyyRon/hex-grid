@@ -49,3 +49,16 @@
   stroke-width: 2;
   pointer-events: none;
 }
+
+@media (max-width: 480px) {
+  .hex-grid-wrapper {
+    max-width: 100%;
+    margin: 4px auto 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .hex-grid-wrapper {
+    max-width: 100%;
+  }
+}

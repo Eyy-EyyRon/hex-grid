@@ -107,3 +107,34 @@
   font-size: 0.78rem;
   color: #666;
 }
+
+@media (max-width: 480px) {
+  .leaderboard {
+    padding: 14px 12px;
+    border-radius: 12px;
+  }
+
+  .lb-row {
+    padding: 6px 8px;
+    gap: 8px;
+  }
+
+  .lb-avatar,
+  .lb-swatch {
+    width: 20px;
+    height: 20px;
+  }
+
+  .lb-name {
+    font-size: 0.82rem;
+  }
+
+  .lb-count {
+    font-size: 0.9rem;
+  }
+
+  .lb-total {
+    margin-top: 8px;
+    font-size: 0.72rem;
+  }
+}
