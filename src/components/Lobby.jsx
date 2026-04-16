@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { PLAYER_COLORS } from "../gameLogic";
 import { startGame, setGameMode } from "../hooks/useMatch";
+import "./Lobby.css";
 
 const MODES = [
   { key: "domination", label: "Domination", desc: "Capture every tile to win" },
@@ -24,126 +25,154 @@ export default function Lobby({ match, user, onNavigate }) {
     if (match?.status === "playing") onNavigate("game", match.id);
   }, [match?.status]);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(match.id);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(match.id);
+    } catch {
+      // Fallback for browsers/contexts where clipboard access is restricted.
+      const ta = document.createElement("textarea");
+      ta.value = match.id;
+      ta.setAttribute("readonly", "true");
+      ta.style.position = "absolute";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+
     setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    window.setTimeout(() => setCopied(false), 1500);
   };
 
   if (!match) return null;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_center,#0d0a1a,#03071e_70%,#000)] flex items-center justify-center p-5 relative overflow-hidden">
-      {/* Ambient ember orbs */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#9d0208]/[0.07] blur-[100px] animate-float" />
-        <div className="absolute bottom-[-15%] right-[-5%] w-[400px] h-[400px] rounded-full bg-[#e85d04]/[0.05] blur-[100px] animate-float [animation-delay:-7s]" />
-      </div>
+    <div className="lobby-screen">
+      <div className="lobby-card">
 
-      <div className="relative w-full max-w-[520px]">
-        <div className="absolute -inset-4 bg-gradient-to-br from-[#d00000]/[0.05] to-[#e85d04]/[0.05] rounded-3xl blur-2xl pointer-events-none" />
+          <h2 className="lobby-title">Waiting Room</h2>
 
-        <div className="relative backdrop-blur-xl bg-[#370617]/30 border border-[#6a040f]/30 rounded-3xl p-9 shadow-[0_24px_80px_rgba(0,0,0,0.6)] flex flex-col items-center gap-6 animate-[modal-in_0.3s_ease-out]">
+          <div className="code-section" aria-label="Room code section">
+            <button type="button" onClick={handleCopy} className="code-button">
+              <span className="code-label">Room Code</span>
+              <div className="code-display">{match.id}</div>
 
-          <h2 className="text-2xl font-bold text-white tracking-tight">Waiting Room</h2>
+              <div className="code-action" aria-live="polite">
+                <svg
+                  className="code-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  aria-hidden="true"
+                >
+                  <path d="M9 9h10v10H9z" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+                <span>{copied ? "Copied!" : "Tap to copy"}</span>
+              </div>
+            </button>
+          </div>
 
-          {/* Room code — massive glowing badge */}
-          <button
-            onClick={handleCopy}
-            className="group cursor-pointer flex flex-col items-center gap-2 px-10 py-5 bg-[#ffba08]/[0.04] border-2 border-dashed border-[#f48c06]/20 rounded-2xl hover:bg-[#ffba08]/[0.08] hover:border-[#f48c06]/40 transition-all w-full"
-          >
-            <span className="text-[0.6rem] font-extrabold tracking-[0.2em] uppercase text-[#6a040f]">Room Code</span>
-            <div className="flex items-center gap-3">
-              <span className="text-4xl font-black tracking-[0.5em] font-mono text-[#ffba08] drop-shadow-[0_0_20px_rgba(255,186,8,0.4)]">
-                {match.id}
-              </span>
-              <svg className="w-5 h-5 text-[#6a040f] group-hover:text-[#faa307] transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <rect x="9" y="9" width="13" height="13" rx="2" />
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-              </svg>
-            </div>
-            <span className="text-[0.65rem] text-[#6a040f] group-hover:text-[#faa307]/70 transition-colors">
-              {copied ? "Copied!" : "click to copy"}
-            </span>
-          </button>
-
-          {/* Mode picker */}
-          <div className="w-full flex flex-col gap-2">
-            <span className="text-[0.7rem] font-bold text-[#9d0208]/60 uppercase tracking-[0.12em]">Game Mode</span>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div className="mode-section" aria-label="Game mode selection">
+            <span className="mode-label">Game Mode</span>
+            <div className="mode-grid">
               {MODES.map((m) => {
                 const active = gameMode === m.key;
                 return (
                   <button
                     key={m.key}
+                    type="button"
                     disabled={!isHost}
                     onClick={() => isHost && setGameMode(match.id, m.key)}
-                    className={`flex flex-col items-center gap-1 px-3 py-3 rounded-xl border-2 transition-all duration-200 cursor-pointer disabled:cursor-default
-                      ${active
-                        ? "border-[#e85d04] bg-[#e85d04]/[0.12] text-white shadow-[0_0_12px_rgba(232,93,4,0.2)]"
-                        : "border-[#6a040f]/20 bg-[#370617]/20 text-slate-400 hover:border-[#e85d04]/30 hover:bg-[#e85d04]/[0.04]"
-                      }`}
+                    className={`mode-button${active ? " active" : ""}`}
                   >
-                    <span className="text-[0.8rem] font-bold leading-tight">{m.label}</span>
-                    <span className="text-[0.6rem] opacity-60 leading-snug text-center">{m.desc}</span>
+                    <span className="mode-name">{m.label}</span>
+                    <span className="mode-desc">{m.desc}</span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Player list */}
-          <div className="w-full flex flex-col gap-2">
-            <span className="text-[0.7rem] font-bold text-[#9d0208]/60 uppercase tracking-[0.12em]">
-              Players ({playerCount})
-            </span>
-            <div className="flex flex-col gap-2">
-              {Object.entries(players).map(([uid, p]) => (
-                <div
-                  key={uid}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#03071e]/40 border border-[#6a040f]/20 transition-colors"
-                >
-                  {p.photoURL ? (
-                    <img className="w-7 h-7 rounded-full object-cover border-2 border-[#6a040f]/40" src={p.photoURL} alt="" referrerPolicy="no-referrer" />
-                  ) : (
-                    <span className="w-7 h-7 rounded-full shrink-0" style={{ backgroundColor: PLAYER_COLORS[p.colorIndex] }} />
-                  )}
-                  <span className="text-sm font-semibold text-slate-200 flex-1 truncate">{p.displayName}</span>
-                  <span className="w-3 h-3 rounded-full border-2 border-white/20 shrink-0" style={{ backgroundColor: PLAYER_COLORS[p.colorIndex] }} />
-                  {uid === match.hostId && (
-                    <span className="text-[0.6rem] font-extrabold text-[#ffba08] bg-[#ffba08]/10 px-2 py-0.5 rounded tracking-wider">HOST</span>
-                  )}
-                </div>
-              ))}
+          <div className="players-section" aria-label="Player list">
+            <div className="players-header">
+              <span className="players-label">Players</span>
+              <span className="players-count">
+                {playerCount}/{MAX_PLAYERS}
+              </span>
+            </div>
+
+            <div className="players-list">
+              {Object.entries(players).map(([uid, p]) => {
+                const color = PLAYER_COLORS[p.colorIndex ?? 0];
+                const isMe = uid === user.uid;
+                const isMatchHost = uid === match.hostId;
+
+                return (
+                  <div key={uid} className="player-item">
+                    {p.photoURL ? (
+                      <img
+                        className="player-avatar"
+                        src={p.photoURL}
+                        alt=""
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <span
+                        className="player-avatar--placeholder"
+                        style={{ backgroundColor: color }}
+                      />
+                    )}
+
+                    <div className="player-info">
+                      <span className="player-name">{p.displayName || "Unknown"}</span>
+                      <span className="player-status">
+                        {isMatchHost ? "Host" : isMe ? "You" : "Joined"}
+                      </span>
+                    </div>
+
+                    <span
+                      className="player-color"
+                      style={{ backgroundColor: color, color }}
+                      aria-hidden="true"
+                    />
+
+                    {isMatchHost && <span className="player-badge">HOST</span>}
+                  </div>
+                );
+              })}
+
               {playerCount < MAX_PLAYERS && (
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-dashed border-[#6a040f]/20 animate-pulse">
-                  <span className="w-7 h-7 rounded-full bg-[#370617]/30 shrink-0" />
-                  <span className="text-sm text-[#6a040f]/60 italic">Waiting for players...</span>
+                <div className="player-waiting">
+                  <span className="player-waiting-dot" />
+                  <span className="player-waiting-text">Waiting for players...</span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Start / waiting */}
           {isHost ? (
             <button
-              className="w-full py-5 rounded-2xl font-extrabold text-lg bg-gradient-to-r from-[#9d0208] via-[#d00000] to-[#e85d04] text-white animate-pulse-glow hover:-translate-y-0.5 hover:brightness-110 active:scale-[0.98] transition-all duration-200 cursor-pointer"
+              type="button"
+              className="start-button"
               onClick={() => startGame(match.id)}
             >
               Start Game
             </button>
           ) : (
-            <p className="text-sm text-[#6a040f] animate-pulse py-2">Waiting for host to start...</p>
+            <div className="waiting-message">Waiting for host to start...</div>
           )}
 
           <button
-            className="text-xs font-semibold text-[#6a040f] hover:text-[#faa307] transition-colors cursor-pointer"
+            type="button"
+            className="leave-button"
             onClick={() => onNavigate("home")}
           >
             Leave
           </button>
         </div>
       </div>
-    </div>
   );
 }
