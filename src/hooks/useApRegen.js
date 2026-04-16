@@ -17,11 +17,33 @@ export function useApRegen(user, userData, setUserData) {
 
   // Initialize lastRegenTime from userData on mount
   useEffect(() => {
-    if (!userData?.lastLoginTime) return;
-    if (lastRegenRef.current) return; // already initialized
+    // If `lastLoginTime` is missing, AP regen can't start. Fall back to "now"
+    // (best-effort sync back to Firestore) so other clients don't get stuck.
+    if (!userData?.lastLoginTime) {
+      if ((userData?.ap ?? 0) >= MAX_AP) return;
+      if (lastRegenRef.current) return;
+
+      const now = new Date();
+      lastRegenRef.current = now;
+      const uid = user?.uid;
+      if (uid) {
+        updateDoc(doc(db, "users", uid), { lastLoginTime: now }).catch((err) => {
+          console.error("AP regen fallback write failed:", err);
+        });
+      }
+      return;
+    }
+
     const lt = userData.lastLoginTime;
-    lastRegenRef.current = lt.toDate ? lt.toDate() : new Date(lt);
-  }, [userData?.lastLoginTime]);
+    const parsed = lt.toDate ? lt.toDate() : new Date(lt);
+    const parsedMs = parsed?.getTime?.();
+
+    // Guard against malformed/serialized cache data.
+    if (!parsedMs || Number.isNaN(parsedMs)) return;
+
+    // Keep the regen timer aligned with the latest `lastLoginTime` from auth.
+    lastRegenRef.current = parsed;
+  }, [userData?.lastLoginTime, userData?.ap, user?.uid]);
 
   // Tick every second
   useEffect(() => {

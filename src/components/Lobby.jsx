@@ -22,8 +22,10 @@ export default function Lobby({ match, user, onNavigate }) {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (match?.status === "playing") onNavigate("game", match.id);
-  }, [match?.status]);
+    if (!match) return;
+    const started = match.status === "playing" && !!match.startTime;
+    if (started) onNavigate("game", match.id);
+  }, [match?.status, match?.startTime]);
 
   const handleCopy = async () => {
     try {

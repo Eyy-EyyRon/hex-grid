@@ -15,7 +15,14 @@ export function useMatch(matchId) {
   const [loading, setLoading] = useState(!!matchId);
 
   useEffect(() => {
-    if (!matchId) { setMatch(null); setLoading(false); return; }
+    if (!matchId) {
+      setMatch(null);
+      setLoading(false);
+      return;
+    }
+
+    // Clear previous match immediately so UI can't briefly render with stale status.
+    setMatch(null);
     setLoading(true);
     const unsub = onSnapshot(doc(db, "matches", matchId), (snap) => {
       setMatch(snap.exists() ? { id: snap.id, ...snap.data({ serverTimestamps: 'estimate' }) } : null);
@@ -56,7 +63,20 @@ export async function joinMatch(matchId, user, username) {
   const snap = await getDoc(ref);
   if (!snap.exists()) throw new Error("Match not found");
   const data = snap.data();
-  if (data.status !== "waiting") throw new Error("Match already started");
+
+  // Back-compat / defensive: some older/partial matches may not have `status` populated.
+  // Treat those as joinable as long as the game clearly hasn't started yet.
+  const status = data.status;
+  const tiles = data.tiles || {};
+  const hasAnyTiles = Object.keys(tiles).length > 0;
+  const hasStartTime = !!data.startTime;
+
+  const joinable =
+    status === "waiting" ||
+    (status == null && !hasStartTime && !hasAnyTiles); // "waiting-like" match
+
+  if (!joinable) throw new Error("Match already started");
+  // If user is already in the player list (e.g. re-joining after a lobby reset), just let them in.
   if (data.players[user.uid]) return;
 
   const used = new Set(Object.values(data.players).map((p) => p.colorIndex));
@@ -134,6 +154,23 @@ export async function playAgain(matchId, players) {
     tiles,
     winnerId: null,
     startTime: serverTimestamp(),
+    kothOwner: null,
+    kothClaimTime: null,
+  };
+  Object.keys(players).forEach((uid) => {
+    updates[`players.${uid}.isAlive`] = true;
+    updates[`players.${uid}.score`] = 0;
+  });
+  await updateDoc(doc(db, "matches", matchId), updates);
+}
+
+/** Reset match back to the lobby so the same invite code can be reused. */
+export async function resetToLobby(matchId, players) {
+  const updates = {
+    status: "waiting",
+    tiles: {},
+    winnerId: null,
+    startTime: null,
     kothOwner: null,
     kothClaimTime: null,
   };

@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useAuth } from "./hooks/useAuth";
 import {
   useMatch, claimTile, eliminatePlayer,
-  finishMatch as finishMatchFn, playAgain, kothCenterUpdate,
+  finishMatch as finishMatchFn, playAgain, resetToLobby, kothCenterUpdate,
   goldScoreUpdate, spawnGold,
 } from "./hooks/useMatch";
 import { useApRegen } from "./hooks/useApRegen";
@@ -51,6 +51,12 @@ function App() {
 
   if (screen === "lobby") {
     return <Lobby match={match} user={user} onNavigate={navigate} />;
+  }
+
+  // When host resets to lobby, redirect everyone still on the game screen
+  if (match.status === "waiting" && screen === "game") {
+    navigate("lobby", match.id);
+    return <LoadingScreen text="Returning to lobby..." />;
   }
 
   return (
@@ -249,13 +255,14 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
 
   /* ── Spectator / elimination ── */
   const [hadTiles, setHadTiles] = useState(false);
+  const [showEliminatedOverlay, setShowEliminatedOverlay] = useState(false);
   const myTileCount = useMemo(
     () => Object.values(tiles).filter((v) => parseTile(v).owner === user.uid).length,
     [tiles, user.uid],
   );
 
   useEffect(() => { if (myTileCount > 0) setHadTiles(true); }, [myTileCount]);
-  useEffect(() => { if (match.status === "playing") setHadTiles(false); }, [match.status]);
+  useEffect(() => { if (match.status === "playing") { setHadTiles(false); setShowEliminatedOverlay(false); } }, [match.status]);
 
   const isSpectator = myPlayer && !myPlayer.isAlive;
 
@@ -280,6 +287,8 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
     if (match.status !== "playing" || !myPlayer?.isAlive) return;
     if (hadTiles && myTileCount === 0) {
       eliminatePlayer(match.id, user.uid);
+      setShowEliminatedOverlay(true);
+      setTimeout(() => setShowEliminatedOverlay(false), 3500);
     }
   }, [hadTiles, myTileCount, match.status, myPlayer?.isAlive]);
 
@@ -341,21 +350,25 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
 
   useEffect(() => { kothFinishRef.current = false; }, [match.status]);
 
+  // Extract ms value to avoid restarting interval on every Firestore snapshot
+  const kothClaimMs = useMemo(() => {
+    const ct = match.kothClaimTime;
+    if (!ct) return null;
+    return ct.toDate ? ct.toDate().getTime() : ct.seconds ? ct.seconds * 1000 : null;
+  }, [match.kothOwner, match.kothClaimTime]);
+
   useEffect(() => {
     if (match.gameMode !== "koth" || !match.kothOwner || match.status !== "playing") {
       setKothElapsed(0);
       return;
     }
-    const ct = match.kothClaimTime;
-    if (!ct) { setKothElapsed(0); return; }
-    const claimMs = ct.toDate ? ct.toDate().getTime() : ct.seconds ? ct.seconds * 1000 : null;
-    if (!claimMs) { setKothElapsed(0); return; }
+    if (!kothClaimMs) { setKothElapsed(0); return; }
 
-    const tick = () => setKothElapsed(Math.min(Math.max((Date.now() - claimMs) / 1000, 0), 30));
+    const tick = () => setKothElapsed(Math.min(Math.max((Date.now() - kothClaimMs) / 1000, 0), 30));
     tick();
     const id = setInterval(tick, 100);
     return () => clearInterval(id);
-  }, [match.kothOwner, match.kothClaimTime, match.status, match.gameMode]);
+  }, [match.kothOwner, kothClaimMs, match.status, match.gameMode]);
 
   useEffect(() => {
     if (match.gameMode !== "koth" || match.status !== "playing") return;
@@ -385,21 +398,25 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
 
   useEffect(() => { blitzFinishRef.current = false; }, [match.status]);
 
+  // Extract ms value to avoid restarting interval on every Firestore snapshot
+  const blitzStartMs = useMemo(() => {
+    const st = match.startTime;
+    if (!st) return null;
+    return st.toDate ? st.toDate().getTime() : st.seconds ? st.seconds * 1000 : null;
+  }, [match.startTime]);
+
   useEffect(() => {
     if (match.gameMode !== "blitz" || match.status !== "playing") {
       setBlitzRemaining(BLITZ_DURATION);
       return;
     }
-    const st = match.startTime;
-    if (!st) return;
-    const startMs = st.toDate ? st.toDate().getTime() : st.seconds ? st.seconds * 1000 : null;
-    if (!startMs) return;
+    if (!blitzStartMs) return;
 
-    const tick = () => setBlitzRemaining(Math.max(BLITZ_DURATION - (Date.now() - startMs) / 1000, 0));
+    const tick = () => setBlitzRemaining(Math.max(BLITZ_DURATION - (Date.now() - blitzStartMs) / 1000, 0));
     tick();
     const id = setInterval(tick, 100);
     return () => clearInterval(id);
-  }, [match.startTime, match.status, match.gameMode]);
+  }, [blitzStartMs, match.status, match.gameMode]);
 
   const blitzFrozen = match.gameMode === "blitz" && blitzRemaining <= 0 && match.status === "playing";
 
@@ -645,6 +662,17 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
         </aside>
       </main>
 
+      {/* ── Eliminated Overlay ── */}
+      {showEliminatedOverlay && (
+        <div className="fixed inset-0 flex items-center justify-center bg-[#03071e]/80 backdrop-blur-sm z-[300] animate-[modal-in_0.3s_ease-out]">
+          <div className="relative flex flex-col items-center gap-4 px-12 py-10 rounded-2xl bg-[#6a040f]/60 border-2 border-[#d00000]/60 backdrop-blur-md shadow-[0_0_60px_rgba(208,0,0,0.4)]">
+            <div className="text-6xl animate-[ap-pulse_0.8s_ease-in-out_infinite]">☠️</div>
+            <h2 className="text-4xl font-black tracking-widest text-[#ff4444] drop-shadow-[0_0_20px_rgba(255,68,68,0.6)]">YOU LOSE</h2>
+            <p className="text-slate-300 text-sm font-medium">All your tiles were captured — you are now spectating</p>
+          </div>
+        </div>
+      )}
+
       {/* ── Game Over Overlay ── */}
       {match.status === "finished" && (
         <div className="fixed inset-0 flex items-center justify-center bg-[#03071e]/90 backdrop-blur-md z-[200] animate-[modal-in_0.35s_ease-out]">
@@ -657,15 +685,26 @@ function GameView({ user, userData, setUserData, match, onNavigate }) {
                   className="w-9 h-9 rounded-full border-[3px] border-white/20 shadow-[0_0_12px_var(--glow)]"
                   style={{ backgroundColor: winnerColor, '--glow': winnerColor + '66' }}
                 />
-                <span className="text-xl font-bold text-slate-200">{isWinner ? "YOU WON!" : `${winnerName} wins!`}</span>
+                <span className="text-xl font-bold text-slate-200">{isWinner ? "🏆 YOU WON!" : `${winnerName} wins!`}</span>
               </div>
+              {!isWinner && (
+                <p className="text-sm text-[#d00000] font-semibold">You lost this round — better luck next time!</p>
+              )}
               {isHost && (
-                <button
-                  className="w-full py-3 rounded-lg font-bold tracking-wide text-white bg-gradient-to-r from-[#d00000] via-[#e85d04] to-[#f48c06] hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(232,93,4,0.4)] active:scale-[0.97] transition-all duration-200 cursor-pointer"
-                  onClick={() => playAgain(match.id, players)}
-                >
-                  Play Again
-                </button>
+                <>
+                  <button
+                    className="w-full py-3 rounded-lg font-bold tracking-wide text-white bg-gradient-to-r from-[#d00000] via-[#e85d04] to-[#f48c06] hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(232,93,4,0.4)] active:scale-[0.97] transition-all duration-200 cursor-pointer"
+                    onClick={() => playAgain(match.id, players)}
+                  >
+                    ▶ Play Again
+                  </button>
+                  <button
+                    className="w-full py-2.5 rounded-lg font-bold tracking-wide text-white bg-gradient-to-r from-[#370617] via-[#6a040f] to-[#370617] border border-[#6a040f]/50 hover:scale-[1.02] hover:border-[#faa307]/40 hover:shadow-[0_0_16px_rgba(250,163,7,0.25)] active:scale-[0.97] transition-all duration-200 cursor-pointer"
+                    onClick={() => { resetToLobby(match.id, players); onNavigate("lobby", match.id); }}
+                  >
+                    🔁 Back to Lobby
+                  </button>
+                </>
               )}
               <button
                 className="text-sm text-[#6a040f] hover:text-[#faa307] transition-colors underline-offset-4 hover:underline cursor-pointer bg-transparent border-none"
