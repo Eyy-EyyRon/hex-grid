@@ -1,0 +1,488 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+@import './App.css';
+
+/* ─── Tailwind base ─── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Global design tokens ─── */
+:root {
+  color-scheme: dark;
+  --bg-dark: #03071e;
+  --bg-panel: rgba(55, 6, 23, 0.34);
+  --bg-panel-strong: rgba(3, 7, 30, 0.92);
+  --border-soft: rgba(106, 4, 15, 0.14);
+  --border-strong: rgba(106, 4, 15, 0.22);
+  --text-primary: #e2d9c8;
+  --text-muted: rgba(226, 217, 200, 0.7);
+  --accent: #e85d04;
+  --accent-strong: #d00000;
+  --accent-bright: #ffba08;
+  --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.35);
+}
+
+/* ══════════════════════════════════════════
+   Custom Keyframes
+══════════════════════════════════════════ */
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-18px) scale(1.03);
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ap-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 6px rgba(250, 163, 7, 0.5);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(255, 186, 8, 0.85);
+    transform: scale(1.12);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  50% {
+    transform: translateX(6px);
+  }
+  75% {
+    transform: translateX(-3px);
+  }
+}
+
+@keyframes blitz-flash {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes hex-ripple {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes gold-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ══════════════════════════════════════════
+   Animation utilities
+══════════════════════════════════════════ */
+
+.animate-float {
+  animation: float 14s ease-in-out infinite;
+}
+
+.animate-spin {
+  animation: spin 0.9s linear infinite;
+}
+
+.animate-gold-bounce {
+  animation: gold-bounce 1.2s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════
+   Global reset & typography
+══════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100dvh;
+  font-family: 'Poppins', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(106, 4, 15, 0.35), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(232, 93, 4, 0.16), transparent 28%),
+    #03071e;
+  color: var(--text-primary);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+body::selection {
+  background: rgba(232, 93, 4, 0.35);
+  color: #ffffff;
+}
+
+button,
+input,
+textarea,
+select,
+label {
+  font: inherit;
+}
+
+button,
+a,
+[role='button'] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+img,
+svg {
+  max-width: 100%;
+  display: block;
+}
+
+p,
+span,
+li,
+label {
+  color: var(--text-primary);
+}
+
+small,
+.text-muted {
+  color: var(--text-muted);
+}
+
+/* ══════════════════════════════════════════
+   Form controls & focus states
+══════════════════════════════════════════ */
+
+input,
+textarea,
+button,
+select {
+  transition: all 0.2s ease;
+}
+
+input:focus,
+textarea:focus,
+button:focus,
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.16);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(226, 232, 240, 0.5);
+}
+
+input[type='range'] {
+  accent-color: #fcd34d;
+  cursor: pointer;
+}
+
+/* ══════════════════════════════════════════
+   Scrollbar styling
+══════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.35);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 58, 237, 0.65);
+}
+
+/* ══════════════════════════════════════════
+   Utility helpers
+══════════════════════════════════════════ */
+
+.text-soft {
+  color: rgba(226, 232, 240, 0.72);
+}
+
+.bg-panel {
+  background: var(--bg-panel);
+}
+
+.panel-border {
+  border: 1px solid var(--border-soft);
+}
+
+.glow-panel {
+  box-shadow: var(--shadow-soft);
+}
+
+/* ══════════════════════════════════════════
+   Hex grid helpers
+══════════════════════════════════════════ */
+
+.hex-grid-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  overflow: auto;
+  touch-action: pan-x pan-y;
+}
+
+.hex-tile {
+  transition: fill 0.18s ease, stroke 0.18s ease, filter 0.18s ease;
+  cursor: pointer;
+}
+
+
+.hex-tile:hover {
+  filter: brightness(1.18);
+}
+
+.hex-tile--fog {
+  fill: #03071e;
+  cursor: default;
+}
+
+.hex-tile--fog:hover {
+  filter: none;
+}
+
+.hex-tile--fortified {
+  stroke-width: 2.5px;
+}
+
+.hex-tile--gold::after {
+  animation: gold-bounce 1.2s ease-in-out infinite;
+}
+
+/* Capture flash overlay */
+.hex-capture-flash {
+  animation: hex-capture 0.35s ease-out forwards;
+}
+
+/* ══════════════════════════════════════════
+   Leaderboard Component
+══════════════════════════════════════════ */
+
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(106, 4, 15, 0.12);
+  transition: background 0.15s;
+}
+
+.leaderboard-row:last-child {
+  border-bottom: none;
+}
+
+.leaderboard-row--dead {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+.leaderboard-row--me {
+  font-weight: 700;
+}
+
+/* ══════════════════════════════════════════
+   AP Bar — header
+══════════════════════════════════════════ */
+
+.ap-pip {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border-width: 2px;
+  border-style: solid;
+  transition: all 0.25s ease;
+}
+
+.ap-pip--filled {
+  background-color: #faa307;
+  border-color: #ffba08;
+  box-shadow: 0 0 6px rgba(250, 163, 7, 0.5);
+}
+
+.ap-pip--empty {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: rgba(106, 4, 15, 0.4);
+}
+
+.ap-pip--full {
+  animation: ap-pulse 2s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════
+   Game Mode Bars
+══════════════════════════════════════════ */
+
+/* KOTH progress bar */
+.koth-bar-fill {
+  transition: width 0.15s linear;
+}
+
+/* Blitz countdown flash */
+.blitz-bar--warning {
+  animation: blitz-flash 0.5s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════
+   Toast / Status Messages
+══════════════════════════════════════════ */
+
+.status-hint {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ══════════════════════════════════════════
+   Overlay — Game Over / Modals
+══════════════════════════════════════════ */
+
+.overlay-backdrop {
+  animation: modal-in 0.35s ease-out;
+}
+
+/* ══════════════════════════════════════════
+   Lobby Component
+══════════════════════════════════════════ */
+
+.lobby-player-card {
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.lobby-player-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Ready checkmark */
+.lobby-ready-badge {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════
+   Home Screen
+══════════════════════════════════════════ */
+
+.home-match-card {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.home-match-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* ══════════════════════════════════════════
+   Utility: Tabular numbers for timers
+══════════════════════════════════════════ */
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ══════════════════════════════════════════
+   Focus styles — accessible keyboard nav
+══════════════════════════════════════════ */
+
+button:focus-visible,
+input:focus-visible,
+a:focus-visible {
+  outline: 2px solid #f48c06;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ══════════════════════════════════════════
+   Reduced motion overrides
+══════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ══════════════════════════════════════════
+   Mobile safe-area support (notch/home bar)
+══════════════════════════════════════════ */
+
+body {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+header {
+  padding-top: env(safe-area-inset-top, 0);
+}

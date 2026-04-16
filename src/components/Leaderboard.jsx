@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { PLAYER_COLORS, parseTile } from "../gameLogic";
+import "./Leaderboard.css";
 
 export default function Leaderboard({ tiles, playerInfo, currentUid, gameMode }) {
   const rankings = useMemo(() => {
@@ -30,35 +31,41 @@ export default function Leaderboard({ tiles, playerInfo, currentUid, gameMode })
   const totalClaimed = rankings.reduce((sum, p) => sum + p.count, 0);
 
   return (
-    <div className="rounded-xl bg-[#03071e]/40 border border-[#6a040f]/20 p-4 w-full">
-      <h2 className="text-[0.75rem] font-bold text-[#9d0208]/60 uppercase tracking-[0.12em] text-center mb-3">Leaderboard</h2>
+    <div className="leaderboard">
+      <h2 className="lb-title">Leaderboard</h2>
 
       {rankings.length === 0 ? (
-        <p className="text-center text-sm text-[#6a040f]/50">No territories claimed yet.</p>
+        <p className="lb-empty">No territories claimed yet.</p>
       ) : (
-        <div className="flex flex-col gap-1.5">
+        <div className="lb-list">
           {rankings.map((player, i) => {
             const color = PLAYER_COLORS[player.colorIndex ?? 0];
             const isYou = player.uid === currentUid;
+
             return (
-              <div
-                key={player.uid}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg transition-colors ${
-                  isYou ? "bg-[#e85d04]/10 border border-[#e85d04]/20" : "bg-[#370617]/15 hover:bg-[#370617]/30"
-                }`}
-              >
-                <span className="text-[0.75rem] font-bold text-[#6a040f] min-w-[24px]">#{i + 1}</span>
+              <div key={player.uid} className={`lb-row${isYou ? " lb-row--you" : ""}`}>
+                <span className="lb-rank">#{i + 1}</span>
+
                 {player.photoURL ? (
-                  <img className="w-6 h-6 rounded-full object-cover shrink-0 border border-[#6a040f]/30" src={player.photoURL} alt="" referrerPolicy="no-referrer" />
+                  <img
+                    className="lb-avatar"
+                    src={player.photoURL}
+                    alt=""
+                    referrerPolicy="no-referrer"
+                  />
                 ) : (
-                  <span className="w-6 h-6 rounded-full shrink-0 border-2 border-white/15" style={{ backgroundColor: color }} />
+                  <span className="lb-swatch" style={{ backgroundColor: color }} />
                 )}
-                <span className="flex-1 text-sm text-slate-300 truncate">
+
+                <span className="lb-name">
                   {player.displayName || "Unknown"}
-                  {isYou && <span className="ml-1.5 text-[0.6rem] font-bold text-[#ffba08] bg-[#ffba08]/10 px-1.5 py-0.5 rounded align-middle">YOU</span>}
+                  {isYou && <span className="lb-you-tag">YOU</span>}
                 </span>
-                <span className="text-sm font-extrabold text-white min-w-[24px] text-right">
-                  {gameMode === "gold_rush" ? `${player.score || 0}★ · ${player.count}` : player.count}
+
+                <span className="lb-count">
+                  {gameMode === "gold_rush"
+                    ? `${player.score || 0}★ · ${player.count}`
+                    : player.count}
                 </span>
               </div>
             );
@@ -67,7 +74,7 @@ export default function Leaderboard({ tiles, playerInfo, currentUid, gameMode })
       )}
 
       {totalClaimed > 0 && (
-        <p className="mt-3 text-center text-[0.72rem] text-[#6a040f]/50">{totalClaimed} / 61 hexes claimed</p>
+        <p className="lb-total">{totalClaimed} / 61 hexes claimed</p>
       )}
     </div>
   );

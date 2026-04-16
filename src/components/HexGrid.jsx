@@ -31,7 +31,16 @@ function getTileFill(key, tiles, playerInfo) {
   return info ? PLAYER_COLORS[info.colorIndex] : "#555";
 }
 
-export default function HexGrid({ tiles, playerInfo, onHexClick, currentUid, visibleSet, onHexHover, gameMode }) {
+export default function HexGrid({
+  tiles,
+  playerInfo,
+  onHexClick,
+  currentUid,
+  visibleSet,
+  onHexHover,
+  gameMode,
+  hoveredKey,
+}) {
   const cells = useMemo(() => generateGrid(), []);
   const svgRef = useRef(null);
   const gestureRef = useRef({ panning: false, sx: 0, sy: 0, moved: false });
@@ -164,6 +173,7 @@ export default function HexGrid({ tiles, playerInfo, onHexClick, currentUid, vis
           const key = `${q},${r}`;
           const { x, y } = axialToPixel(q, r);
           const isVisible = !visibleSet || visibleSet.has(key);
+          const isHovered = hoveredKey === key;
 
           if (!isVisible) {
             return (
@@ -188,7 +198,7 @@ export default function HexGrid({ tiles, playerInfo, onHexClick, currentUid, vis
                onPointerLeave={() => onHexHover?.(null)}>
               <polygon
                 points={hexCorners(x, y, HEX_SIZE - 2)}
-                className={`hex-cell${isOwn ? " hex-cell--own" : ""}${isGold ? " hex-cell--gold" : ""}`}
+                className={`hex-cell${isOwn ? " hex-cell--own" : ""}${isGold ? " hex-cell--gold" : ""}${isHovered ? " hex-cell--hovered" : ""}`}
                 style={{ fill: isGold ? "#f1c40f" : fill }}
               />
               {fortified && (

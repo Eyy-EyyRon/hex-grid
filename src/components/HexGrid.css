@@ -33,6 +33,12 @@
   stroke-width: 2;
 }
 
+.hex-cell--hovered {
+  stroke: rgba(255, 186, 8, 0.95);
+  stroke-width: 3.2;
+  filter: drop-shadow(0 0 10px rgba(255, 186, 8, 0.35)) brightness(1.35);
+}
+
 .hex-cell--own {
   stroke: rgba(196, 181, 253, 0.8);
   stroke-width: 2.5;
